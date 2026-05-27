@@ -1,0 +1,10 @@
+# Objetos y Binarios
+obj/
+*.o
+*.out
+
+# Ejecutable final
+sniffer
+
+# Archivos de configuración
+.vscode/
