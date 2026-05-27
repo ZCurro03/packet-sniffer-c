@@ -2,6 +2,7 @@ CC = gcc -g
 CFLAGS = -Wall -Wextra
 
 EXE = sniffer
+LIBS = -lpcap
 OBJ = obj/main.o
 
 all: compile run
@@ -26,7 +27,7 @@ clean:
 	@rm -f obj/*.o
 
 $(EXE): $(OBJ)
-	@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 obj/main.o: src/main.c
 	@$(CC) $(CFLAGS) -c $< -o $@
