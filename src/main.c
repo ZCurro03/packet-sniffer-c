@@ -3,7 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <signal.h>
-#include <pcap.h>
+#include <pcap/pcap.h>
+#include "../include/packet_handler.h"
 
 #define IP_PACKET_SZ 65535
 
@@ -102,12 +103,6 @@ pcap_if_t* get_sniffing_device(pcap_if_t *alldevs, size_t dev_count) {
     return dev;
 }
 
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-    static size_t count = 1;
-    fprintf(stdout, "Packet %ld received.\n", count);
-    count++;
-}
-
 int main() {
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
 
@@ -146,7 +141,7 @@ int main() {
     fprintf(stdout, "-------------\n\n");
 
     /* Use -1 to sniff until an error occurs */
-    pcap_loop(sniff_handle, -1, got_packet, NULL);
+    pcap_loop(sniff_handle, -1, process_packet, NULL);
 
     pcap_close(sniff_handle);
     pcap_freealldevs(alldevs);

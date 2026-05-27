@@ -3,7 +3,8 @@ CFLAGS = -Wall -Wextra
 
 EXE = sniffer
 LIBS = -lpcap
-OBJ = obj/main.o
+HEADER = include/packet_handler.h
+OBJ = obj/main.o obj/packet_handler.o
 
 all: compile run
 
@@ -29,5 +30,8 @@ clean:
 $(EXE): $(OBJ)
 	@$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-obj/main.o: src/main.c
+obj/main.o: src/main.c $(HEADER)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+obj/packet_handler.o: src/packet_handler.c include/packet_handler.h
 	@$(CC) $(CFLAGS) -c $< -o $@
