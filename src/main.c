@@ -2,9 +2,34 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <signal.h>
 #include <pcap.h>
 
 #define IP_PACKET_SZ 65535
+
+pcap_t *sniff_handle = NULL;
+
+void handle_sigint(int signum) {
+    if (signum == SIGINT && sniff_handle != NULL) {
+        pcap_breakloop(sniff_handle);
+    }
+}
+
+bool set_signal_handler(int signum, void (*handler)(int)) {
+    struct sigaction action = {0};
+
+    /* Block all signals during the handler's execution to avoid interruptions */
+    sigfillset(&(action.sa_mask));
+    action.sa_handler = handler;
+    action.sa_flags = 0;
+
+    if (sigaction(signum, &action, NULL) == -1) {
+        perror("sigaction");
+        return false;
+    }
+
+    return true;
+}
 
 void list_all_available_devices(pcap_if_t *alldevs, size_t *count) {
     if (count == NULL) {
@@ -77,8 +102,18 @@ pcap_if_t* get_sniffing_device(pcap_if_t *alldevs, size_t dev_count) {
     return dev;
 }
 
+void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+    static size_t count = 1;
+    fprintf(stdout, "Packet %ld received.\n", count);
+    count++;
+}
+
 int main() {
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
+
+    if (!set_signal_handler(SIGINT, handle_sigint)) {
+        return EXIT_FAILURE;
+    }
 
     pcap_if_t *alldevs = NULL;
 	if (pcap_findalldevs(&alldevs, errbuf) == PCAP_ERROR) {
@@ -100,17 +135,23 @@ int main() {
 
     fprintf(stdout, "Sniffing device: %s.\n", dev != NULL ? dev->name : "none");
 
-    pcap_t *handle = pcap_open_live(dev->name, IP_PACKET_SZ, 1, 1000, errbuf);
-    if (handle == NULL) {
+    sniff_handle = pcap_open_live(dev->name, IP_PACKET_SZ, 1, 1000, errbuf);
+    if (sniff_handle == NULL) {
         fprintf(stderr, "Couldn't open device %s: %s\n", dev->name, errbuf);
         pcap_freealldevs(alldevs);
         return EXIT_FAILURE;
     }
 
     fprintf(stdout, "Sniffing session created successfully.\n");
+    fprintf(stdout, "-------------\n\n");
 
-    pcap_close(handle);
+    /* Use -1 to sniff until an error occurs */
+    pcap_loop(sniff_handle, -1, got_packet, NULL);
+
+    pcap_close(sniff_handle);
     pcap_freealldevs(alldevs);
+
+    fprintf(stdout, "Sniffing session closed.\n");
 
     return EXIT_SUCCESS;
 }
