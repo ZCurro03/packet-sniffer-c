@@ -3,8 +3,8 @@ CFLAGS = -Wall -Wextra
 
 EXE = sniffer
 LIBS = -lpcap
-HEADER = include/packet_handler.h
-OBJ = obj/main.o obj/packet_handler.o
+HEADER = include/packet_handler.h include/signal_handler.h include/device_manager.h include/ui.h
+OBJ = obj/main.o obj/packet_handler.o obj/signal_handler.o obj/device_manager.o obj/ui.o
 
 all: compile run
 
@@ -34,4 +34,13 @@ obj/main.o: src/main.c $(HEADER)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 obj/packet_handler.o: src/packet_handler.c include/packet_handler.h
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+obj/signal_handler.o: src/signal_handler.c include/signal_handler.h
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+obj/device_manager.o: src/device_manager.c include/device_manager.h
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+obj/ui.o: src/ui.c include/ui.h
 	@$(CC) $(CFLAGS) -c $< -o $@
