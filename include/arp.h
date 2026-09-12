@@ -8,8 +8,12 @@
  * Macros *
  **********/
 
-#define ARP_OPCODE_REQUEST 1    /* ARP Request operation code */
-#define ARP_OPCODE_REPLY   2    /* ARP Reply operation code */
+#define ARP_OPCODE_REQUEST   1  /* ARP Request operation code */
+#define ARP_OPCODE_REPLY     2  /* ARP Reply operation code */
+#define RARP_OPCODE_REQUEST  3  /* RARP Request operation code */
+#define RARP_OPCODE_REPLY    4  /* RARP Reply operation code */
+#define INARP_OPCODE_REQUEST 8  /* Inverse ARP Request operation code */
+#define INARP_OPCODE_REPLY   9  /* Inverse ARP Reply operation code */
 
 #define ARP_HW_TYPE_ETHERNET 1  /* Hardware type for Ethernet */
 

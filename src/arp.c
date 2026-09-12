@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include "../include/utils.h"
 #include "../include/arp.h"
@@ -24,15 +25,56 @@ void process_arp_packet(const u_char *packet) {
     uint8_t hlen = arp->hlen;
     uint8_t plen = arp->plen;
 
+    const u_char *sender_hw   = packet + sizeof(ArpBaseHeader);
+    const u_char *sender_prot = sender_hw + hlen;
+    const u_char *target_hw   = sender_prot + plen;
+    const u_char *target_prot = target_hw + hlen;
+
+    bool is_eth  = (hw_type == ARP_HW_TYPE_ETHERNET && hlen == ETHERNET_ADDR_LEN);
+    bool is_ipv4 = (proto_type == ARP_PROTO_TYPE_IPV4 && plen == IPV4_ADDR_LEN);
+    bool is_probe = false;
+    bool is_announcement = false;
+
+    struct in_addr sip, tip;
+    if (is_ipv4) {
+        memcpy(&sip, sender_prot, IPV4_ADDR_LEN);
+        memcpy(&tip, target_prot, IPV4_ADDR_LEN);
+        
+        is_probe = (sip.s_addr == 0);
+        is_announcement = (sip.s_addr == tip.s_addr) && (sip.s_addr != 0);
+    }
+
     fprintf(stdout, "ARP packet:\n");
 
     fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Operation:");
     switch (opcode) {
         case ARP_OPCODE_REQUEST:
-            fprintf(stdout, "Request (%d)\n", ARP_OPCODE_REQUEST);
+            fprintf(stdout, "Request ");
+            if (is_probe) {
+                fprintf(stdout, "- ARP Probe ");
+            } else if (is_announcement) {
+                fprintf(stdout, "- ARP Announcement ");
+            }
+            fprintf(stdout, "(%d)\n", ARP_OPCODE_REQUEST);
             break;
         case ARP_OPCODE_REPLY:
-            fprintf(stdout, "Reply (%d)\n", ARP_OPCODE_REPLY);
+            fprintf(stdout, "Reply ");
+            if (is_announcement) {
+                fprintf(stdout, "- ARP Announcement ");
+            }
+            fprintf(stdout, "(%d)\n", ARP_OPCODE_REPLY);
+            break;
+        case RARP_OPCODE_REQUEST:
+            fprintf(stdout, "Reverse ARP Request (%d)\n", RARP_OPCODE_REQUEST);
+            break;
+        case RARP_OPCODE_REPLY:
+            fprintf(stdout, "Reverse ARP Reply (%d)\n", RARP_OPCODE_REPLY);
+            break;
+        case INARP_OPCODE_REQUEST:
+            fprintf(stdout, "Inverse ARP Request (%d)\n", INARP_OPCODE_REQUEST);
+            break;
+        case INARP_OPCODE_REPLY:
+            fprintf(stdout, "Inverse ARP Reply (%d)\n", INARP_OPCODE_REPLY);
             break;
         default:
             fprintf(stdout, "Other (%u)\n", opcode);
@@ -59,34 +101,26 @@ void process_arp_packet(const u_char *packet) {
             break;
     }
 
-    const u_char *sender_hw   = packet + sizeof(ArpBaseHeader);
-    const u_char *sender_prot = sender_hw + hlen;
-    const u_char *target_hw   = sender_prot + plen;
-    const u_char *target_prot = target_hw + hlen;
-
-    /* Formatted display for Ethernet + IPv4 */
-    if (hw_type == ARP_HW_TYPE_ETHERNET && proto_type == ARP_PROTO_TYPE_IPV4
-            && hlen == ETHERNET_ADDR_LEN && plen == IPV4_ADDR_LEN) {
+    /* Formatted display for Ethernet and IPv4 */
+    if (is_eth) {
         fprintf(stdout, "  %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
                 FIELD_WIDTH, "Sender MAC:",
                 sender_hw[0], sender_hw[1], sender_hw[2],
                 sender_hw[3], sender_hw[4], sender_hw[5]);
 
-        if (opcode == ARP_OPCODE_REPLY) {
-            fprintf(stdout, "  %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
-                    FIELD_WIDTH, "Target MAC:",
-                    target_hw[0], target_hw[1], target_hw[2],
-                    target_hw[3], target_hw[4], target_hw[5]);
-        }
+        fprintf(stdout, "  %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
+                FIELD_WIDTH, "Target MAC:",
+                target_hw[0], target_hw[1], target_hw[2],
+                target_hw[3], target_hw[4], target_hw[5]);
+    } else {
+        fprintf(stdout, "Hardware addresses parsing unsupported (Type: %u, HLEN: %u).\n", hw_type, hlen);
+    }
 
-        struct in_addr sip, tip;
-        memcpy(&sip, sender_prot, IPV4_ADDR_LEN);
-        memcpy(&tip, target_prot, IPV4_ADDR_LEN);
-
+    if (is_ipv4) {
         fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Sender IP:", inet_ntoa(sip));
         fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Target IP:", inet_ntoa(tip));
     } else {
-        fprintf(stdout, "Unsupported link or network protocol (HW Type: %u, Proto: 0x%04X). Skipping detailed parsing.\n", 
-                hw_type, proto_type);
+        fprintf(stdout, "Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n", 
+                proto_type, plen);
     }
 }
