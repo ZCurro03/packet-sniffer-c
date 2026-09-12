@@ -2,6 +2,7 @@
 #define ETHERNET_H
 
 #include <stdint.h>
+#include <pcap/pcap.h>
 
 #define ETHERNET_ADDR_LEN   6  /* MAC addresses are 6 bytes long */
 #define ETHERNET_HEADER_LEN 14 /* Ethernet header is 14 bytes long */
@@ -25,5 +26,7 @@ typedef struct __attribute__((__packed__)) {
     uint8_t  src_mac[ETHERNET_ADDR_LEN];  /* Source MAC address */
     uint16_t ethertype;                   /* EtherType field (big-endian) */
 } EthernetHeader;
+
+void process_ethernet_frame(const u_char *packet);
 
 #endif /* ETHERNET_H */
