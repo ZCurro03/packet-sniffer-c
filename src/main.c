@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <signal.h>
 #include <pcap/pcap.h>
 #include "../include/packet_handler.h"

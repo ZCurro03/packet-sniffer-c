@@ -1,0 +1,29 @@
+#ifndef ETHERNET_H
+#define ETHERNET_H
+
+#include <stdint.h>
+
+#define ETHERNET_ADDR_LEN   6  /* MAC addresses are 6 bytes long */
+#define ETHERNET_HEADER_LEN 14 /* Ethernet header is 14 bytes long */
+
+#define ETHERTYPE_IPv4 0x0800 /* IPv4 protocol */
+#define ETHERTYPE_ARP  0x0806 /* ARP protocol */
+#define ETHERTYPE_IPv6 0x86DD /* IPv6 protocol */
+
+/** Ethernet II (or DIX) frame format:
+ * Preamble | Destination MAC | Source MAC | EtherType | Payload | FCS
+ * 
+ * Preamble and FCS are ignored by libpcap, so final frame is:
+ * Destination MAC | Source MAC | EtherType | Payload
+ * 
+ * Header without payload is 14 bytes long:
+ * 6 bytes for destination MAC, 6 bytes for source MAC, and 2 bytes for EtherType.
+ */
+
+typedef struct __attribute__((__packed__)) {
+    uint8_t  dest_mac[ETHERNET_ADDR_LEN]; /* Destination MAC address */
+    uint8_t  src_mac[ETHERNET_ADDR_LEN];  /* Source MAC address */
+    uint16_t ethertype;                   /* EtherType field (big-endian) */
+} EthernetHeader;
+
+#endif /* ETHERNET_H */
