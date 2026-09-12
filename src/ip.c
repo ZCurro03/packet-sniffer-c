@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../include/utils.h"
 #include "../include/ip.h"
 
 
@@ -21,16 +22,16 @@ void process_ipv4_packet(const u_char *packet) {
 
     switch (protocol) {
         case PROTOCOL_ICMP:
-            fprintf(stdout, "  ICMP protocol to be implemented.\n");
+            fprintf(stdout, "ICMP protocol to be implemented.\n");
             break;
         case PROTOCOL_TCP:
-            fprintf(stdout, "  TCP protocol to be implemented.\n");
+            fprintf(stdout, "TCP protocol to be implemented.\n");
             break;
         case PROTOCOL_UDP:
-            fprintf(stdout, "  UDP protocol to be implemented.\n");
+            fprintf(stdout, "UDP protocol to be implemented.\n");
             break;
         default:
-            fprintf(stdout, "  Unsupported protocol value.\n");
+            fprintf(stdout, "Unsupported protocol value.\n");
             break;
     }
 
@@ -54,22 +55,23 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
     }
 
     fprintf(stdout, "IPv4 headers:\n");
-    fprintf(stdout, "  Source IP:      %s\n", inet_ntoa(ipv4_header->src_ip));
-    fprintf(stdout, "  Destination IP: %s\n", inet_ntoa(ipv4_header->dest_ip));
+    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Source IP:", inet_ntoa(ipv4_header->src_ip));
+    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Destination IP:", inet_ntoa(ipv4_header->dest_ip));
 
+    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Protocol:");
     uint8_t protocol = ipv4_header->protocol;
     switch (protocol) {
         case PROTOCOL_ICMP:
-            fprintf(stdout, "  Protocol:       ICMP (%u).\n", protocol);
+            fprintf(stdout, "ICMP (%u)\n", protocol);
             break;
         case PROTOCOL_TCP:
-            fprintf(stdout, "  Protocol:       TCP (%u).\n", protocol);
+            fprintf(stdout, "TCP (%u)\n", protocol);
             break;
         case PROTOCOL_UDP:
-            fprintf(stdout, "  Protocol:       UDP (%u).\n", protocol);
+            fprintf(stdout, "UDP (%u)\n", protocol);
             break;
         default:
-            fprintf(stdout, "  Protocol:       Other (%u).\n", protocol);
+            fprintf(stdout, "Other (%u)\n", protocol);
             break;
     }
 

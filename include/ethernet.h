@@ -17,8 +17,10 @@
  * Preamble and FCS are ignored by libpcap, so final frame is:
  * Destination MAC | Source MAC | EtherType | Payload
  * 
- * Header without payload is 14 bytes long:
- * 6 bytes for destination MAC, 6 bytes for source MAC, and 2 bytes for EtherType.
+ * Destination MAC: 48 bits (6 bytes) - MAC address of the destination device
+ * Source MAC: 48 bits (6 bytes) - MAC address of the source device
+ * EtherType: 16 bits (2 bytes) - Indicates the protocol of the payload (e.g., IPv4, ARP, IPv6)
+ * Payload: Variable length - The actual data being transmitted (e.g., IP packet, ARP message)
  */
 
 typedef struct __attribute__((__packed__)) {
