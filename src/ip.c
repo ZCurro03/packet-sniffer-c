@@ -3,8 +3,22 @@
 #include "../include/ip.h"
 
 
+/*********************************
+ * Private functions declaration *
+ *********************************/
+
+/**
+ * Processes the IPv4 headers and prints relevant information.
+ * @param ipv4_header Pointer to the IPv4 header structure.
+ * @param header_len Pointer to a variable where the calculated header length will be stored.
+ * @return The protocol number of the next layer (TCP, UDP, ICMP...) or 0 if an error occurred.
+ */
 uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len);
 
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
 
 void process_ipv4_packet(const u_char *packet) {
     if (!packet) {
@@ -37,6 +51,11 @@ void process_ipv4_packet(const u_char *packet) {
 
     /* const u_char *transport_packet = packet + ipv4_header_len; */
 }
+
+
+/************************************
+ * Private functions implementation *
+ ************************************/
 
 uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len) {
     if (!ipv4_header || !header_len) {

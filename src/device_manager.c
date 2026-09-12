@@ -2,12 +2,22 @@
 #include <stdlib.h>
 #include "../include/device_manager.h"
 
+
+/****************************************
+ * Opaque data structure implementation *
+ ****************************************/
+
 struct _DeviceManager {
     pcap_if_t *alldevs;
     pcap_if_t *selected_dev;
     size_t dev_count;
     size_t selected_dev_idx;
 };
+
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
 
 DeviceManager* device_manager_init() {
     DeviceManager *manager = (DeviceManager *) malloc(sizeof(DeviceManager));

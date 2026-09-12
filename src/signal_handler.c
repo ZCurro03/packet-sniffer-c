@@ -3,6 +3,11 @@
 #include <signal.h>
 #include "../include/signal_handler.h"
 
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
+
 bool set_signal_handler(int signum, void (*handler)(int)) {
     struct sigaction action = {0};
 

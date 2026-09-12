@@ -6,6 +6,9 @@
 #include "../include/ip.h"
 
 
+/***********************************
+ * Public functions implementation *
+ ***********************************/
 
 void process_arp_packet(const u_char *packet) {
     if (!packet) {

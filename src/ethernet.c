@@ -5,8 +5,21 @@
 #include "../include/arp.h"
 
 
+/*********************************
+ * Private functions declaration *
+ *********************************/
+
+/**
+ * Processes the Ethernet headers and prints relevant information.
+ * @param eth_header Pointer to the Ethernet header structure.
+ * @return The EtherType value of the upper-layer protocol or 0 if an error occurred.
+ */
 uint16_t process_ethernet_headers(const EthernetHeader *eth_header);
 
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
 
 void process_ethernet_frame(const u_char *packet) {
     if (!packet) {
@@ -37,6 +50,11 @@ void process_ethernet_frame(const u_char *packet) {
             break;
     }
 }
+
+
+/************************************
+ * Private functions implementation *
+ ************************************/
 
 uint16_t process_ethernet_headers(const EthernetHeader *eth_header) {
     if (!eth_header) {

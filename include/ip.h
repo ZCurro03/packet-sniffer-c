@@ -3,16 +3,26 @@
 
 #include <pcap/pcap.h>
 
+
+/**********
+ * Macros *
+ **********/
+
 #define IPV4_ADDR_LEN 4     /* Length of an IPv4 address in bytes */
 
 #define IPV4_MIN_IHL_VALUE 5    /* Minimum IHL value for IPv4 header (5 * 4 = 20 bytes) */
 #define IPV4_MAX_IHL_VALUE 15   /* Maximum IHL value for IPv4 header (15 * 4 = 60 bytes) */
 
-#define IPV4_VERSION 4  /* IPv4 version number */
+#define IPV4_VERSION 4  /* IPv4 version number in the IP header */
 
-#define PROTOCOL_ICMP 1     /* ICMP protocol number */
-#define PROTOCOL_TCP  6     /* TCP protocol number */
-#define PROTOCOL_UDP  17    /* UDP protocol number */
+#define PROTOCOL_ICMP 1     /* ICMP protocol number in the IP header */
+#define PROTOCOL_TCP  6     /* TCP protocol number in the IP header */
+#define PROTOCOL_UDP  17    /* UDP protocol number in the IP header */
+
+
+/*******************
+ * Data structures *
+ *******************/
 
 /** IPv4 header format:
  * Version | IHL | Type of Service | Total Length | Identification | Flags | Fragment Offset | TTL | Protocol | Header Checksum | Source IP | Destination IP
@@ -33,6 +43,12 @@
  * Options field is optional and not included in this structure. The header without options is 20 bytes long.
  */
 
+/**
+ * IPv4 header structure definition.
+ * The structure is packed to ensure that there is no padding between fields.
+ * The fields are defined according to the IPv4 header format. The Options field is not included in
+ * this structure, and the header length is determined by the IHL field.
+ */
 typedef struct __attribute__((packed)) {
     uint8_t  version_ihl;       /* Version (4 bits) + Internet Header Length (4 bits) */
     uint8_t  tos;               /* Type of Service */
@@ -46,6 +62,15 @@ typedef struct __attribute__((packed)) {
     struct in_addr dest_ip;     /* Destination IP Address (32 bits) */
 } IPv4Header;
 
+
+/********************************
+ * Public functions declaration *
+ ********************************/
+
+/**
+ * Processes an IPv4 packet and prints relevant information.
+ * @param packet Pointer to the raw packet data.
+ */
 void process_ipv4_packet(const u_char *packet);
 
 #endif /* IP_H */

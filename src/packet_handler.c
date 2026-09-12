@@ -4,11 +4,24 @@
 #include "../include/packet_handler.h"
 #include "../include/ethernet.h"
 
+
+/**********
+ * Macros *
+ **********/
+
 #define TIMESTAMP_STR_SZ 16
 
 
+/*********************************
+ * Private functions declaration *
+ *********************************/
+
 void timestamp_to_str(struct timeval ts, char *buff, size_t sz);
 
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
 
 void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
     if (!header || !packet) {
@@ -27,6 +40,11 @@ void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char
 
     fprintf(stdout, "--------------------------------------------------\n");
 }
+
+
+/************************************
+ * Private functions implementation *
+ ************************************/
 
 void timestamp_to_str(struct timeval ts, char *buff, size_t sz) {
     if (!buff || sz < TIMESTAMP_STR_SZ) {

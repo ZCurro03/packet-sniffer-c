@@ -8,15 +8,29 @@
 #include "../include/device_manager.h"
 #include "../include/ui.h"
 
-#define IP_PACKET_SZ 65535
 
-pcap_t *sniff_handle = NULL;
+/*****************************
+ * Macros & Global Variables *
+ *****************************/
 
-void handle_sigint(int signum) {
-    if (signum == SIGINT && sniff_handle != NULL) {
-        pcap_breakloop(sniff_handle);
-    }
-}
+#define IP_PACKET_SZ 65535      /* Max size of an IP packet */
+
+pcap_t *sniff_handle = NULL;    /* The pcap handle for the active capture session */
+
+
+/*********************************
+ * Private functions declaration *
+ *********************************/
+
+/**
+ * Handles the SIGINT (Ctrl+C) signal to interrupt the capture loop.
+ * @param signum Number of the received signal.
+ */
+void handle_sigint(int signum);
+
+/********
+ * Main *
+ ********/
 
 int main() {
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
@@ -67,4 +81,14 @@ int main() {
     fprintf(stdout, "Sniffing session closed.\n");
 
     return EXIT_SUCCESS;
+}
+
+/************************************
+ * Private functions implementation *
+ ************************************/
+
+void handle_sigint(int signum) {
+    if (signum == SIGINT && sniff_handle != NULL) {
+        pcap_breakloop(sniff_handle);
+    }
 }
