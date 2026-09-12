@@ -30,7 +30,7 @@ void process_ipv4_packet(const u_char *packet) {
             fprintf(stdout, "  UDP protocol to be implemented.\n");
             break;
         default:
-            fprintf(stdout, "  Unknown protocol value.\n");
+            fprintf(stdout, "  Unsupported protocol value.\n");
             break;
     }
 
@@ -69,7 +69,7 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
             fprintf(stdout, "  Protocol:       UDP (%u).\n", protocol);
             break;
         default:
-            fprintf(stdout, "  Protocol:       Unknown (%u).\n", protocol);
+            fprintf(stdout, "  Protocol:       Other (%u).\n", protocol);
             break;
     }
 

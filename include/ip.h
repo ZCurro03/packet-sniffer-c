@@ -3,14 +3,16 @@
 
 #include <pcap/pcap.h>
 
+#define IPV4_ADDR_LEN 4     /* Length of an IPv4 address in bytes */
+
 #define IPV4_MIN_IHL_VALUE 5    /* Minimum IHL value for IPv4 header (5 * 4 = 20 bytes) */
 #define IPV4_MAX_IHL_VALUE 15   /* Maximum IHL value for IPv4 header (15 * 4 = 60 bytes) */
 
 #define IPV4_VERSION 4  /* IPv4 version number */
 
 #define PROTOCOL_ICMP 1     /* ICMP protocol number */
-#define PROTOCOL_TCP 6      /* TCP protocol number */
-#define PROTOCOL_UDP 17     /* UDP protocol number */
+#define PROTOCOL_TCP  6     /* TCP protocol number */
+#define PROTOCOL_UDP  17    /* UDP protocol number */
 
 /** IPv4 header format:
  * Version | IHL | Type of Service | Total Length | Identification | Flags | Fragment Offset | TTL | Protocol | Header Checksum | Source IP | Destination IP
