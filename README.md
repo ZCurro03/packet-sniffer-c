@@ -31,10 +31,12 @@ The simplest way to run the sniffer is with root privileges. You can use the Mak
 
 **Option 2: Using Linux Capabilities (Secure & No Sudo)**
 
-If you prefer not to run the program as root, you can grant the specific network capabilities to the compiled binary. This allows any standard user to execute it:
-* Compile the program: `make compile`
-* Grant raw network capabilities: `sudo setcap cap_net_raw,cap_net_admin=eip sniffer`
-* Run as a normal user: `./sniffer`
+If you prefer not to run the program as root, you can grant the specific network capabilities to the compiled binary. This allows any standard user to execute it. We have included a convenient Make rule to automate this process:
+1. Compile the program and set the network capabilities in one go: 
+   `make compile setcap` 
+   *(Note: This will prompt for your sudo password once to apply the permissions).*
+2. Run the sniffer as a normal user: 
+   `./sniffer`
 
 ## Debugging
 
