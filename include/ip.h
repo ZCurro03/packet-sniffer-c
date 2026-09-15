@@ -16,6 +16,7 @@
 #define IPV4_VERSION 4  /* IPv4 version number in the IP header */
 
 #define PROTOCOL_ICMP 1     /* ICMP protocol number in the IP header */
+#define PROTOCOL_IGMP 2     /* IGMP protocol number in the IP header */
 #define PROTOCOL_TCP  6     /* TCP protocol number in the IP header */
 #define PROTOCOL_UDP  17    /* UDP protocol number in the IP header */
 

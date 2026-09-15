@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../include/utils.h"
 #include "../include/ip.h"
+#include "../include/tcp.h"
 
 
 /*********************************
@@ -38,8 +39,11 @@ void process_ipv4_packet(const u_char *packet) {
         case PROTOCOL_ICMP:
             fprintf(stdout, "ICMP protocol to be implemented.\n");
             break;
+        case PROTOCOL_IGMP:
+            fprintf(stdout, "IGMP to be implemented.\n");
+            break;
         case PROTOCOL_TCP:
-            fprintf(stdout, "TCP protocol to be implemented.\n");
+            process_tcp_segment(packet + ipv4_header_len);
             break;
         case PROTOCOL_UDP:
             fprintf(stdout, "UDP protocol to be implemented.\n");
