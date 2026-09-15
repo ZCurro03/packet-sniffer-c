@@ -64,22 +64,24 @@ void process_arp_packet(const u_char *packet) {
     fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Hardware Type:");
     switch (hw_type) {
         case ARP_HW_TYPE_ETHERNET:
-            fprintf(stdout, "Ethernet (%d)\n", ARP_HW_TYPE_ETHERNET);
+            fprintf(stdout, "Ethernet");
             break;
         default:
-            fprintf(stdout, "Other (%u)\n", hw_type);
+            fprintf(stdout, "Other");
             break;
     }
+    fprintf(stdout, " (%u)\n", hw_type);
 
     fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Protocol Type:");
     switch (proto_type) {
         case ARP_PROTO_TYPE_IPV4:
-            fprintf(stdout, "IPv4 (0x%04X)\n", ARP_PROTO_TYPE_IPV4);
+            fprintf(stdout, "IPv4");
             break;
         default:
-            fprintf(stdout, "Other (0x%04X)\n", proto_type);
+            fprintf(stdout, "Other");
             break;
     }
+    fprintf(stdout, " (0x%04X)\n", proto_type);
 
     /* Formatted display for Ethernet and IPv4 */
     if (is_eth) {
@@ -114,35 +116,34 @@ void print_opcode(uint16_t opcode, bool is_probe, bool is_announcement) {
     fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Operation:");
     switch (opcode) {
         case ARP_OPCODE_REQUEST:
-            fprintf(stdout, "Request ");
+            fprintf(stdout, "Request");
             if (is_probe) {
-                fprintf(stdout, "- ARP Probe ");
+                fprintf(stdout, " - ARP Probe");
             } else if (is_announcement) {
-                fprintf(stdout, "- ARP Announcement ");
+                fprintf(stdout, " - ARP Announcement");
             }
-            fprintf(stdout, "(%d)\n", ARP_OPCODE_REQUEST);
             break;
         case ARP_OPCODE_REPLY:
-            fprintf(stdout, "Reply ");
+            fprintf(stdout, "Reply");
             if (is_announcement) {
-                fprintf(stdout, "- ARP Announcement ");
+                fprintf(stdout, " - ARP Announcement");
             }
-            fprintf(stdout, "(%d)\n", ARP_OPCODE_REPLY);
             break;
         case RARP_OPCODE_REQUEST:
-            fprintf(stdout, "Reverse ARP Request (%d)\n", RARP_OPCODE_REQUEST);
+            fprintf(stdout, "Reverse ARP Request");
             break;
         case RARP_OPCODE_REPLY:
-            fprintf(stdout, "Reverse ARP Reply (%d)\n", RARP_OPCODE_REPLY);
+            fprintf(stdout, "Reverse ARP Reply");
             break;
         case INARP_OPCODE_REQUEST:
-            fprintf(stdout, "Inverse ARP Request (%d)\n", INARP_OPCODE_REQUEST);
+            fprintf(stdout, "Inverse ARP Request");
             break;
         case INARP_OPCODE_REPLY:
-            fprintf(stdout, "Inverse ARP Reply (%d)\n", INARP_OPCODE_REPLY);
+            fprintf(stdout, "Inverse ARP Reply");
             break;
         default:
-            fprintf(stdout, "Other (%u)\n", opcode);
+            fprintf(stdout, "Other");
             break;
     }
+    fprintf(stdout, " (%u)\n", opcode);
 }

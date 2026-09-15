@@ -3,6 +3,7 @@
 #include "../include/ip.h"
 #include "../include/tcp.h"
 #include "../include/udp.h"
+#include "../include/icmp.h"
 
 
 /*********************************
@@ -38,7 +39,7 @@ void process_ipv4_packet(const u_char *packet) {
 
     switch (protocol) {
         case PROTOCOL_ICMP:
-            fprintf(stdout, "ICMP protocol to be implemented.\n");
+            process_icmp_message(packet + ipv4_header_len);
             break;
         case PROTOCOL_IGMP:
             fprintf(stdout, "IGMP to be implemented.\n");
@@ -86,18 +87,19 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
     uint8_t protocol = ipv4_header->protocol;
     switch (protocol) {
         case PROTOCOL_ICMP:
-            fprintf(stdout, "ICMP (%u)\n", protocol);
+            fprintf(stdout, "ICMP");
             break;
         case PROTOCOL_TCP:
-            fprintf(stdout, "TCP (%u)\n", protocol);
+            fprintf(stdout, "TCP");
             break;
         case PROTOCOL_UDP:
-            fprintf(stdout, "UDP (%u)\n", protocol);
+            fprintf(stdout, "UDP");
             break;
         default:
-            fprintf(stdout, "Other (%u)\n", protocol);
+            fprintf(stdout, "Other");
             break;
     }
+    fprintf(stdout, " (%u)\n", protocol);
 
     return protocol;
 }

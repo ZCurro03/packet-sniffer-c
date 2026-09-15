@@ -75,18 +75,19 @@ uint16_t process_ethernet_headers(const EthernetHeader *eth_header) {
     uint16_t ethertype = ntohs(eth_header->ethertype);
     switch (ethertype) {
         case ETHERTYPE_IPv4:
-            fprintf(stdout, "IPv4 (0x%04X)\n", ethertype);
+            fprintf(stdout, "IPv4");
             break;
         case ETHERTYPE_ARP:
-            fprintf(stdout, "ARP (0x%04X)\n", ethertype);
+            fprintf(stdout, "ARP");
             break;
         case ETHERTYPE_IPv6:
-            fprintf(stdout, "IPv6 (0x%04X)\n", ethertype);
+            fprintf(stdout, "IPv6");
             break;
         default:
-            fprintf(stdout, "Other (0x%04X)\n", ethertype);
+            fprintf(stdout, "Other");
             break;
     }
+    fprintf(stdout, " (0x%04X)\n", ethertype);
 
     return ethertype;
 }
