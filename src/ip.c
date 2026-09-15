@@ -2,6 +2,7 @@
 #include "../include/utils.h"
 #include "../include/ip.h"
 #include "../include/tcp.h"
+#include "../include/udp.h"
 
 
 /*********************************
@@ -46,7 +47,7 @@ void process_ipv4_packet(const u_char *packet) {
             process_tcp_segment(packet + ipv4_header_len);
             break;
         case PROTOCOL_UDP:
-            fprintf(stdout, "UDP protocol to be implemented.\n");
+            process_udp_datagram(packet + ipv4_header_len);
             break;
         default:
             fprintf(stdout, "Unsupported protocol value.\n");

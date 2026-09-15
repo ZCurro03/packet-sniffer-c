@@ -17,7 +17,7 @@ void process_tcp_segment(const u_char *segment) {
     const TcpHeader *tcp_header = (const TcpHeader *)segment;
 
     uint16_t src_port = ntohs(tcp_header->src_port);
-    uint16_t dst_port = ntohs(tcp_header->dst_port);
+    uint16_t dst_port = ntohs(tcp_header->dest_port);
     uint32_t seq_num  = ntohl(tcp_header->seq_num);
     uint8_t flags     = tcp_header->flags;
 
@@ -49,6 +49,8 @@ void process_tcp_segment(const u_char *segment) {
     uint8_t  data_offset    = (tcp_header->offset_res >> 4);
     uint32_t tcp_header_len = data_offset * 4;
     const u_char *app_payload = segment + tcp_header_len;
+
+    (void)app_payload;  /* Suppress unused variable warning */
 
     /* TODO: Process application layer payload if needed */
 }

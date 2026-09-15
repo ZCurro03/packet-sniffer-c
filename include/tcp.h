@@ -46,7 +46,7 @@
  */
 typedef struct __attribute__((packed)) {
     uint16_t src_port;    /* Source Port (16 bits) */
-    uint16_t dst_port;    /* Destination Port (16 bits) */
+    uint16_t dest_port;   /* Destination Port (16 bits) */
     uint32_t seq_num;     /* Sequence Number (32 bits) */
     uint32_t ack_num;     /* Acknowledgment Number (32 bits) */
     uint8_t  offset_res;  /* Data Offset (4 bits) and Reserved (4 bits) */
