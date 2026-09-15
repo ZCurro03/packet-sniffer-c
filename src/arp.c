@@ -7,6 +7,19 @@
 #include "../include/ip.h"
 
 
+/*********************************
+ * Private functions declaration *
+ *********************************/
+
+/**
+ * Prints the ARP operation code in a human-readable format.
+ * @param opcode The ARP operation code.
+ * @param is_probe Flag indicating if the packet is an ARP probe.
+ * @param is_announcement Flag indicating if the packet is an ARP announcement.
+ */
+void print_opcode(uint16_t opcode, bool is_probe, bool is_announcement);
+
+
 /***********************************
  * Public functions implementation *
  ***********************************/
@@ -46,40 +59,7 @@ void process_arp_packet(const u_char *packet) {
 
     fprintf(stdout, "ARP packet:\n");
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Operation:");
-    switch (opcode) {
-        case ARP_OPCODE_REQUEST:
-            fprintf(stdout, "Request ");
-            if (is_probe) {
-                fprintf(stdout, "- ARP Probe ");
-            } else if (is_announcement) {
-                fprintf(stdout, "- ARP Announcement ");
-            }
-            fprintf(stdout, "(%d)\n", ARP_OPCODE_REQUEST);
-            break;
-        case ARP_OPCODE_REPLY:
-            fprintf(stdout, "Reply ");
-            if (is_announcement) {
-                fprintf(stdout, "- ARP Announcement ");
-            }
-            fprintf(stdout, "(%d)\n", ARP_OPCODE_REPLY);
-            break;
-        case RARP_OPCODE_REQUEST:
-            fprintf(stdout, "Reverse ARP Request (%d)\n", RARP_OPCODE_REQUEST);
-            break;
-        case RARP_OPCODE_REPLY:
-            fprintf(stdout, "Reverse ARP Reply (%d)\n", RARP_OPCODE_REPLY);
-            break;
-        case INARP_OPCODE_REQUEST:
-            fprintf(stdout, "Inverse ARP Request (%d)\n", INARP_OPCODE_REQUEST);
-            break;
-        case INARP_OPCODE_REPLY:
-            fprintf(stdout, "Inverse ARP Reply (%d)\n", INARP_OPCODE_REPLY);
-            break;
-        default:
-            fprintf(stdout, "Other (%u)\n", opcode);
-            break;
-    }
+    print_opcode(opcode, is_probe, is_announcement);
 
     fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Hardware Type:");
     switch (hw_type) {
@@ -122,5 +102,47 @@ void process_arp_packet(const u_char *packet) {
     } else {
         fprintf(stdout, "Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n", 
                 proto_type, plen);
+    }
+}
+
+
+/************************************
+ * Private functions implementation *
+ ************************************/
+
+void print_opcode(uint16_t opcode, bool is_probe, bool is_announcement) {
+    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Operation:");
+    switch (opcode) {
+        case ARP_OPCODE_REQUEST:
+            fprintf(stdout, "Request ");
+            if (is_probe) {
+                fprintf(stdout, "- ARP Probe ");
+            } else if (is_announcement) {
+                fprintf(stdout, "- ARP Announcement ");
+            }
+            fprintf(stdout, "(%d)\n", ARP_OPCODE_REQUEST);
+            break;
+        case ARP_OPCODE_REPLY:
+            fprintf(stdout, "Reply ");
+            if (is_announcement) {
+                fprintf(stdout, "- ARP Announcement ");
+            }
+            fprintf(stdout, "(%d)\n", ARP_OPCODE_REPLY);
+            break;
+        case RARP_OPCODE_REQUEST:
+            fprintf(stdout, "Reverse ARP Request (%d)\n", RARP_OPCODE_REQUEST);
+            break;
+        case RARP_OPCODE_REPLY:
+            fprintf(stdout, "Reverse ARP Reply (%d)\n", RARP_OPCODE_REPLY);
+            break;
+        case INARP_OPCODE_REQUEST:
+            fprintf(stdout, "Inverse ARP Request (%d)\n", INARP_OPCODE_REQUEST);
+            break;
+        case INARP_OPCODE_REPLY:
+            fprintf(stdout, "Inverse ARP Reply (%d)\n", INARP_OPCODE_REPLY);
+            break;
+        default:
+            fprintf(stdout, "Other (%u)\n", opcode);
+            break;
     }
 }
