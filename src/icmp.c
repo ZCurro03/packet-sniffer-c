@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../include/utils.h"
+#include "../include/ip.h"
 #include "../include/icmp.h"
 
 
@@ -23,13 +24,16 @@ void process_icmp_message(const u_char *message) {
             fprintf(stdout, "Echo Reply");
             break;
         case ICMP_TYPE_ECHO_REQUEST:
-            fprintf(stdout, "Echo Request - Ping");
+            fprintf(stdout, "Echo Request");
+            break;
+        case ICMP_TYPE_REDIRECT:
+            fprintf(stdout, "Redirect");
             break;
         case ICMP_TYPE_DEST_UNREACH:
             fprintf(stdout, "Destination Unreachable");
             break;
         case ICMP_TYPE_TIME_EXCEEDED:
-            fprintf(stdout, "Time Exceeded - Traceroute");
+            fprintf(stdout, "Time Exceeded");
             break;
         default:
             fprintf(stdout, "Other");
@@ -46,5 +50,14 @@ void process_icmp_message(const u_char *message) {
         
         fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Identifier:", identifier);
         fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Sequence Num:", sequence);
+    }
+
+    if (icmp->type == ICMP_TYPE_DEST_UNREACH || icmp->type == ICMP_TYPE_TIME_EXCEEDED) {
+        const IPv4Header *inner_ip = (const IPv4Header *)(message + sizeof(IcmpHeader));
+
+        fprintf(stdout, "Original Failed IPv4 Packet:\n");
+        fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Original Src IP:", inet_ntoa(inner_ip->src_ip));
+        fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Original Dst IP:", inet_ntoa(inner_ip->dest_ip));
+        fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Original Protocol:", inner_ip->protocol);
     }
 }

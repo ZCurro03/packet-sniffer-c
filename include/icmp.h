@@ -10,6 +10,7 @@
 
 #define ICMP_TYPE_ECHO_REPLY    0   /* Echo Reply */
 #define ICMP_TYPE_DEST_UNREACH  3   /* Destination Unreachable */
+#define ICMP_TYPE_REDIRECT      5   /* Redirect */
 #define ICMP_TYPE_ECHO_REQUEST  8   /* Echo Request */
 #define ICMP_TYPE_TIME_EXCEEDED 11  /* Time Exceeded */
 
