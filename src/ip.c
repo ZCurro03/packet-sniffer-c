@@ -4,6 +4,7 @@
 #include "../include/tcp.h"
 #include "../include/udp.h"
 #include "../include/icmp.h"
+#include "../include/igmp.h"
 
 
 /*********************************
@@ -42,7 +43,8 @@ void process_ipv4_packet(const u_char *packet) {
             process_icmp_message(packet + ipv4_header_len);
             break;
         case PROTOCOL_IGMP:
-            fprintf(stdout, "IGMP to be implemented.\n");
+            uint16_t igmp_length = ntohs(ipv4_header->total_length) - ipv4_header_len;
+            process_igmp_packet(packet + ipv4_header_len, igmp_length);
             break;
         case PROTOCOL_TCP:
             process_tcp_segment(packet + ipv4_header_len);
@@ -88,6 +90,9 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
     switch (protocol) {
         case PROTOCOL_ICMP:
             fprintf(stdout, "ICMP");
+            break;
+        case PROTOCOL_IGMP:
+            fprintf(stdout, "IGMP");
             break;
         case PROTOCOL_TCP:
             fprintf(stdout, "TCP");

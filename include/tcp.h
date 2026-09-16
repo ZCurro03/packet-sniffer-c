@@ -8,7 +8,6 @@
  * Macros *
  **********/
 
-#define TCP_NUM_FLAGS 8     /* Number of TCP flags (CWR, ECE, URG, ACK, PSH, RST, SYN, FIN) */
 #define TCP_FLAG_CWR  0x80  /* CWR flag mask */
 #define TCP_FLAG_ECE  0x40  /* ECE flag mask */
 #define TCP_FLAG_URG  0x20  /* URG flag mask */
