@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "../include/utils.h"
 #include "../include/ethernet.h"
-#include "../include/ip.h"
+#include "../include/ipv4.h"
 #include "../include/arp.h"
 
 
