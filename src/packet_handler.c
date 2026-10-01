@@ -9,13 +9,19 @@
  * Macros *
  **********/
 
-#define TIMESTAMP_STR_SZ 16
+#define TIMESTAMP_STR_SZ 16     /* Size of the timestamp string */
 
 
 /*********************************
  * Private functions declaration *
  *********************************/
 
+/**
+ * Converts a timestamp to a string format.
+ * @param ts The timestamp to convert.
+ * @param buff The buffer to store the resulting string.
+ * @param sz The size of the buffer.
+ */
 void timestamp_to_str(struct timeval ts, char *buff, size_t sz);
 
 
@@ -28,8 +34,8 @@ void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char
         fprintf(stderr, "Error: invalid packet or header received.\n");
         return;
     }
-    (void)args; /* Unused parameter */
-    
+    (void)args;  /* Unused parameter */
+
     char timestamp[TIMESTAMP_STR_SZ] = {0};
     timestamp_to_str(header->ts, timestamp, sizeof(timestamp));
 
@@ -50,7 +56,7 @@ void timestamp_to_str(struct timeval ts, char *buff, size_t sz) {
         memset(buff, 0, sz);
         return;
     }
-    
+
     /* HH:MM:SS --> Hour, minute and second in local time */
     time_t local_tv_sec = ts.tv_sec;
     struct tm *local_time = localtime(&local_tv_sec);

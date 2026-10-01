@@ -8,10 +8,10 @@
  ****************************************/
 
 struct _DeviceManager {
-    pcap_if_t *alldevs;
-    pcap_if_t *selected_dev;
-    size_t dev_count;
-    size_t selected_dev_idx;
+    pcap_if_t *alldevs;           /* List of all available devices */
+    pcap_if_t *selected_dev;      /* Selected device */
+    size_t     dev_count;         /* Total number of available devices */
+    size_t     selected_dev_idx;  /* Index of the selected device */
 };
 
 

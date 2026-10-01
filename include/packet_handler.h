@@ -9,7 +9,7 @@
  ********************************/
 
 /**
- * Process a captured packet.
+ * Processes a captured packet.
  * @param args User-defined arguments (unused).
  * @param header Packet header.
  * @param packet Packet data.

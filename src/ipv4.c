@@ -24,9 +24,9 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
  * Public functions implementation *
  ***********************************/
 
-void process_ipv4_packet(const u_char *packet) {
-    if (!packet) {
-        fprintf(stderr, "Error: invalid IPv4 packet.\n");
+void process_ipv4_packet(const u_char *packet, uint32_t length) {
+    if (!packet || length < IPV4_HEADER_MIN_LEN) {
+        fprintf(stderr, "Error: invalid or truncated IPv4 packet.\n");
         return;
     }
 
@@ -38,13 +38,34 @@ void process_ipv4_packet(const u_char *packet) {
         return;
     }
 
+    if (length < ipv4_header_len) {
+        fprintf(stderr, "Error: truncated IPv4 packet (requires %u bytes, got %u).\n", ipv4_header_len, length);
+        return;
+    }
+
+    uint16_t total_length = ntohs(ipv4_header->total_length);
+    if (total_length < ipv4_header_len) {
+        fprintf(stderr, "Error: invalid IPv4 packet (total length is smaller than header length).\n");
+        return;
+    }
+
+    uint32_t expected_payload_len = total_length - ipv4_header_len;
+    uint32_t captured_payload_len = length - ipv4_header_len;
+
+    /* If the packet claims to be larger than what we actually captured, we limit ourselves strictly to what was captured */
+    uint32_t safe_payload_len = expected_payload_len;
+    if (expected_payload_len > captured_payload_len) {
+        fprintf(stdout, "  [!] Warning: IPv4 payload may have been truncated during capture (%u of %u bytes available)\n",
+                captured_payload_len, expected_payload_len);
+        safe_payload_len = captured_payload_len;
+    }
+
     switch (protocol) {
         case PROTOCOL_ICMP:
             process_icmp_message(packet + ipv4_header_len);
             break;
         case PROTOCOL_IGMP:
-            uint16_t igmp_length = ntohs(ipv4_header->total_length) - ipv4_header_len;
-            process_igmp_packet(packet + ipv4_header_len, igmp_length);
+            process_igmp_packet(packet + ipv4_header_len, safe_payload_len);
             break;
         case PROTOCOL_TCP:
             process_tcp_segment(packet + ipv4_header_len);
@@ -53,11 +74,9 @@ void process_ipv4_packet(const u_char *packet) {
             process_udp_datagram(packet + ipv4_header_len);
             break;
         default:
-            fprintf(stdout, "Unsupported protocol value.\n");
+            fprintf(stdout, "Unsupported protocol value for further processing.\n");
             break;
     }
-
-    /* const u_char *transport_packet = packet + ipv4_header_len; */
 }
 
 
@@ -105,6 +124,12 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
             break;
     }
     fprintf(stdout, " (%u)\n", protocol);
+
+    /* Notify about the presence of IPv4 options */
+    if (ihl > IPV4_MIN_IHL_VALUE) {
+        uint8_t options_len = *header_len - IPV4_HEADER_MIN_LEN;
+        fprintf(stdout, "  %-*s %u bytes present\n", FIELD_WIDTH, "IPv4 Options:", options_len);
+    }
 
     return protocol;
 }

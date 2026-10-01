@@ -9,19 +9,20 @@
  * Macros *
  **********/
 
-#define ETHERNET_ADDR_LEN   6  /* Length of a MAC address in bytes */
-#define ETHERNET_HEADER_LEN 14 /* Length of an Ethernet header in bytes */
+#define ETHERNET_ADDR_LEN   6   /* Length of a MAC address in bytes */
+#define ETHERNET_HEADER_LEN 14  /* Length of an Ethernet header in bytes */
 
-#define ETHERTYPE_IPv4 0x0800 /* IPv4 ethertype value */
-#define ETHERTYPE_ARP  0x0806 /* ARP ethertype value */
-#define ETHERTYPE_IPv6 0x86DD /* IPv6 ethertype value */
+#define ETHERTYPE_IPv4 0x0800   /* IPv4 ethertype value */
+#define ETHERTYPE_ARP  0x0806   /* ARP ethertype value */
+#define ETHERTYPE_IPv6 0x86DD   /* IPv6 ethertype value */
 
 
 /*******************
  * Data structures *
  *******************/
 
-/** Ethernet II (or DIX) frame format:
+/**
+ * Ethernet II (or DIX) frame format:
  * Preamble | Destination MAC | Source MAC | EtherType | Payload | FCS
  * 
  * Preamble and FCS are ignored by libpcap, so final frame is:
@@ -39,9 +40,9 @@
  * The fields are defined according to the Ethernet II header format.
  */
 typedef struct __attribute__((__packed__)) {
-    uint8_t  dest_mac[ETHERNET_ADDR_LEN]; /* Destination MAC address */
-    uint8_t  src_mac[ETHERNET_ADDR_LEN];  /* Source MAC address */
-    uint16_t ethertype;                   /* EtherType field (big-endian) */
+    uint8_t  dest_mac[ETHERNET_ADDR_LEN];  /* Destination MAC address */
+    uint8_t  src_mac[ETHERNET_ADDR_LEN];   /* Source MAC address */
+    uint16_t ethertype;                    /* EtherType field (big-endian) */
 } EthernetHeader;
 
 

@@ -4,6 +4,13 @@
 #include <pcap/pcap.h>
 
 
+/**********
+ * Macros *
+ **********/
+
+#define UDP_HEADER_LEN 8  /* Length of a UDP header in bytes */
+
+
 /*******************
  * Data structures *
  *******************/
@@ -24,10 +31,10 @@
  * The fields are defined according to the UDP header format.
  */
 typedef struct __attribute__((packed)) {
-    uint16_t src_port;    /* Source Port (16 bits) */
-    uint16_t dest_port;   /* Destination Port (16 bits) */
-    uint16_t len;         /* Length (16 bits) */
-    uint16_t checksum;    /* Checksum (16 bits) */
+    uint16_t src_port;   /* Source Port (16 bits) */
+    uint16_t dest_port;  /* Destination Port (16 bits) */
+    uint16_t len;        /* Length (16 bits) */
+    uint16_t checksum;   /* Checksum (16 bits) */
 } UdpHeader;
 
 
@@ -38,7 +45,8 @@ typedef struct __attribute__((packed)) {
 /**
  * Process a UDP datagram.
  * @param datagram The UDP datagram to process.
+ * @param length The length of the UDP datagram.
  */
-void process_udp_datagram(const u_char *datagram);
+void process_udp_datagram(const u_char *datagram, uint32_t length);
 
 #endif /* UDP_H */

@@ -13,7 +13,8 @@
  * Macros & Global Variables *
  *****************************/
 
-#define IP_PACKET_SZ 65535      /* Max size of an IP packet */
+#define MAX_CAPLEN 65535        /* Maximum capture length for the pcap library */
+#define PROMISC 1               /* Enable promiscuous mode */
 
 pcap_t *sniff_handle = NULL;    /* The pcap handle for the active capture session */
 
@@ -28,13 +29,12 @@ pcap_t *sniff_handle = NULL;    /* The pcap handle for the active capture sessio
  */
 void handle_sigint(int signum);
 
+
 /********
  * Main *
  ********/
 
 int main() {
-    char errbuf[PCAP_ERRBUF_SIZE] = {0};
-
     if (!set_signal_handler(SIGINT, handle_sigint)) {
         return EXIT_FAILURE;
     }
@@ -63,9 +63,10 @@ int main() {
     pcap_if_t *dev = device_manager_get_selected_device(manager);
     fprintf(stdout, "\nSniffing device: %s.\n", dev != NULL ? dev->name : "none");
 
-    sniff_handle = pcap_open_live(dev->name, IP_PACKET_SZ, 1, 1000, errbuf);
+    char errbuf[PCAP_ERRBUF_SIZE] = {0};
+    sniff_handle = pcap_open_live(dev->name, MAX_CAPLEN, PROMISC, 1000, errbuf);
     if (sniff_handle == NULL) {
-        fprintf(stderr, "Couldn't open device '%s': %s\n", dev->name, errbuf);
+        fprintf(stderr, "Error: Couldn't open device '%s'. %s\n", dev->name, errbuf);
         device_manager_free(manager);
         return EXIT_FAILURE;
     }
@@ -82,6 +83,7 @@ int main() {
 
     return EXIT_SUCCESS;
 }
+
 
 /************************************
  * Private functions implementation *

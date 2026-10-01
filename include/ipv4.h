@@ -10,10 +10,12 @@
 
 #define IPV4_ADDR_LEN 4     /* Length of an IPv4 address in bytes */
 
+#define IPV4_HEADER_MIN_LEN 20  /* Minimum length of the IPv4 header in bytes */
+
 #define IPV4_MIN_IHL_VALUE 5    /* Minimum IHL value for IPv4 header (5 * 4 = 20 bytes) */
 #define IPV4_MAX_IHL_VALUE 15   /* Maximum IHL value for IPv4 header (15 * 4 = 60 bytes) */
 
-#define IPV4_VERSION 4  /* IPv4 version number in the IP header */
+#define IPV4_VERSION 4      /* IPv4 version number in the IP header */
 
 #define PROTOCOL_ICMP 1     /* ICMP protocol number in the IP header */
 #define PROTOCOL_IGMP 2     /* IGMP protocol number in the IP header */
@@ -25,7 +27,8 @@
  * Data structures *
  *******************/
 
-/** IPv4 header format:
+/**
+ * IPv4 header format:
  * Version | IHL | Type of Service | Total Length | Identification | Flags | Fragment Offset | TTL | Protocol | Header Checksum | Source IP | Destination IP
  * 
  * Version: 4 bits - IP version (4 for IPv4)
@@ -51,16 +54,16 @@
  * this structure, and the header length is determined by the IHL field.
  */
 typedef struct __attribute__((packed)) {
-    uint8_t  version_ihl;       /* Version (4 bits) + Internet Header Length (4 bits) */
-    uint8_t  tos;               /* Type of Service */
-    uint16_t total_length;      /* Total length of the packet (IP header + payload) */
-    uint16_t id;                /* Identification */
-    uint16_t flags_fo;          /* Flags (3 bits) + Fragment offset (13 bits) */
-    uint8_t  ttl;               /* Time to Live */
-    uint8_t  protocol;          /* Protocol of the next layer (TCP, UDP, ICMP...) */
-    uint16_t checksum;          /* Header Checksum */
-    struct in_addr src_ip;      /* Source IP Address (32 bits) */
-    struct in_addr dest_ip;     /* Destination IP Address (32 bits) */
+    uint8_t  version_ihl;    /* Version (4 bits) + Internet Header Length (4 bits) */
+    uint8_t  tos;            /* Type of Service */
+    uint16_t total_length;   /* Total length of the packet (IP header + payload) */
+    uint16_t id;             /* Identification */
+    uint16_t flags_fo;       /* Flags (3 bits) + Fragment offset (13 bits) */
+    uint8_t  ttl;            /* Time to Live */
+    uint8_t  protocol;       /* Protocol of the next layer (TCP, UDP, ICMP...) */
+    uint16_t checksum;       /* Header Checksum */
+    struct in_addr src_ip;   /* Source IP Address (32 bits) */
+    struct in_addr dest_ip;  /* Destination IP Address (32 bits) */
 } IPv4Header;
 
 
@@ -71,7 +74,8 @@ typedef struct __attribute__((packed)) {
 /**
  * Processes an IPv4 packet and prints relevant information.
  * @param packet Pointer to the raw packet data.
+ * @param length Length of the IPv4 packet.
  */
-void process_ipv4_packet(const u_char *packet);
+void process_ipv4_packet(const u_char *packet, uint32_t length);
 
 #endif /* IPV4_H */

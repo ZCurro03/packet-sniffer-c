@@ -8,6 +8,8 @@
  * Macros *
  **********/
 
+#define ARP_BASE_HEADER_LEN  8  /* Length of an ARP base header in bytes */
+
 #define ARP_OPCODE_REQUEST   1  /* ARP Request operation code */
 #define ARP_OPCODE_REPLY     2  /* ARP Reply operation code */
 #define RARP_OPCODE_REQUEST  3  /* RARP Request operation code */
@@ -41,11 +43,11 @@
  * The fields are defined according to the ARP header format.
  */
 typedef struct __attribute__((packed)) {
-    uint16_t hw_type;    /* Hardware type */
-    uint16_t proto_type; /* Type of protocol */
-    uint8_t  hlen;       /* Length of hardware address (MAC) */
-    uint8_t  plen;       /* Length of protocol address (IP) */
-    uint16_t opcode;     /* Operation code (Request 1, Reply 2, ...) */
+    uint16_t hw_type;     /* Hardware type */
+    uint16_t proto_type;  /* Type of protocol */
+    uint8_t  hlen;        /* Length of hardware address (MAC) */
+    uint8_t  plen;        /* Length of protocol address (IP) */
+    uint16_t opcode;      /* Operation code (Request 1, Reply 2, ...) */
 } ArpBaseHeader;
 
 
@@ -56,7 +58,8 @@ typedef struct __attribute__((packed)) {
 /**
  * Processes an ARP packet and prints relevant information.
  * @param packet Pointer to the raw ARP packet data.
+ * @param length The length of the ARP packet.
  */
-void process_arp_packet(const u_char *packet);
+void process_arp_packet(const u_char *packet, uint32_t length);
 
 #endif /* ARP_H */

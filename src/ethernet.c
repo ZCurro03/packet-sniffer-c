@@ -24,7 +24,7 @@ uint16_t process_ethernet_headers(const EthernetHeader *eth_header);
 
 void process_ethernet_frame(const u_char *packet, uint32_t length) {
     if (!packet || length < ETHERNET_HEADER_LEN) {
-        fprintf(stderr, "Error: invalid Ethernet frame.\n");
+        fprintf(stderr, "Error: invalid or truncated Ethernet frame.\n");
         return;
     }
 
@@ -39,16 +39,16 @@ void process_ethernet_frame(const u_char *packet, uint32_t length) {
 
     switch (ethertype) {
         case ETHERTYPE_IPv4:
-            process_ipv4_packet(packet + ETHERNET_HEADER_LEN);
+            process_ipv4_packet(packet + ETHERNET_HEADER_LEN, payload_length);
             break;
         case ETHERTYPE_ARP:
-            process_arp_packet(packet + ETHERNET_HEADER_LEN);
+            process_arp_packet(packet + ETHERNET_HEADER_LEN, payload_length);
             break;
         case ETHERTYPE_IPv6:
             process_ipv6_packet(packet + ETHERNET_HEADER_LEN, payload_length);
             break;
         default:
-            fprintf(stdout, "Unsupported upper-layer protocol.\n");
+            fprintf(stdout, "Unsupported upper-layer protocol for further processing.\n");
             break;
     }
 }

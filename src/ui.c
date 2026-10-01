@@ -3,6 +3,11 @@
 #include <string.h>
 #include "../include/ui.h"
 
+
+/***********************************
+ * Public functions implementation *
+ ***********************************/
+
 void ui_display_available_devices(pcap_if_t *alldevs) {
     fprintf(stdout, "Available devices:\n");
 
@@ -33,8 +38,8 @@ size_t ui_prompt_for_device_selection(size_t dev_count) {
     bool valid_idx = false;
     char idx_buff[16] = {0};
     do {
-        fprintf(stdout, "Enter the index of the device to sniff on (between 1 and %ld) > ", dev_count);
-        
+        fprintf(stdout, "Enter the index of the device to sniff on (between 1 and %zu) > ", dev_count);
+
         memset(idx_buff, 0, sizeof(idx_buff));
         if (fgets(idx_buff, sizeof(idx_buff), stdin) != NULL) {
             char *newline = strchr(idx_buff, '\n');

@@ -8,3 +8,7 @@ sniffer
 
 # Archivos de configuración
 .vscode/
+
+# Documentación personal
+STYLE.md
+TODO.md

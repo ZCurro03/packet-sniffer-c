@@ -24,9 +24,9 @@ void print_opcode(uint16_t opcode, bool is_probe, bool is_announcement);
  * Public functions implementation *
  ***********************************/
 
-void process_arp_packet(const u_char *packet) {
-    if (!packet) {
-        fprintf(stderr, "Error: invalid ARP packet.\n");
+void process_arp_packet(const u_char *packet, uint32_t length) {
+    if (!packet || length < ARP_BASE_HEADER_LEN) {
+        fprintf(stderr, "Error: invalid or truncated ARP packet.\n");
         return;
     }
 
@@ -35,8 +35,14 @@ void process_arp_packet(const u_char *packet) {
     uint16_t hw_type = ntohs(arp->hw_type);
     uint16_t proto_type = ntohs(arp->proto_type);
     uint16_t opcode = ntohs(arp->opcode);
-    uint8_t hlen = arp->hlen;
-    uint8_t plen = arp->plen;
+    uint8_t  hlen = arp->hlen;
+    uint8_t  plen = arp->plen;
+
+    uint32_t required_length = ARP_BASE_HEADER_LEN + (2 * hlen) + (2 * plen);
+    if (length < required_length) {
+        fprintf(stderr, "Error: truncated ARP packet (requires %u bytes, got %u).\n", required_length, length);
+        return;
+    }
 
     const u_char *sender_hw   = packet + sizeof(ArpBaseHeader);
     const u_char *sender_prot = sender_hw + hlen;
@@ -52,7 +58,7 @@ void process_arp_packet(const u_char *packet) {
     if (is_ipv4) {
         memcpy(&sip, sender_prot, IPV4_ADDR_LEN);
         memcpy(&tip, target_prot, IPV4_ADDR_LEN);
-        
+
         is_probe = (sip.s_addr == 0);
         is_announcement = (sip.s_addr == tip.s_addr) && (sip.s_addr != 0);
     }
@@ -102,7 +108,7 @@ void process_arp_packet(const u_char *packet) {
         fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Sender IP:", inet_ntoa(sip));
         fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Target IP:", inet_ntoa(tip));
     } else {
-        fprintf(stdout, "Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n", 
+        fprintf(stdout, "Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n",
                 proto_type, plen);
     }
 }
