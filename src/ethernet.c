@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "../include/utils.h"
 #include "../include/ethernet.h"
-#include "../include/ipv4.h"
 #include "../include/arp.h"
+#include "../include/ipv4.h"
+#include "../include/ipv6.h"
 
 
 /*********************************
@@ -21,13 +22,14 @@ uint16_t process_ethernet_headers(const EthernetHeader *eth_header);
  * Public functions implementation *
  ***********************************/
 
-void process_ethernet_frame(const u_char *packet) {
-    if (!packet) {
+void process_ethernet_frame(const u_char *packet, uint32_t length) {
+    if (!packet || length < ETHERNET_HEADER_LEN) {
         fprintf(stderr, "Error: invalid Ethernet frame.\n");
         return;
     }
 
     const EthernetHeader *eth_header = (const EthernetHeader *)packet;
+    uint32_t payload_length = length - ETHERNET_HEADER_LEN;
 
     uint16_t ethertype = process_ethernet_headers(eth_header);
     if (ethertype == 0) {
@@ -43,7 +45,7 @@ void process_ethernet_frame(const u_char *packet) {
             process_arp_packet(packet + ETHERNET_HEADER_LEN);
             break;
         case ETHERTYPE_IPv6:
-            fprintf(stdout, "IPv6 protocol to be implemented.\n");
+            process_ipv6_packet(packet + ETHERNET_HEADER_LEN, payload_length);
             break;
         default:
             fprintf(stdout, "Unsupported upper-layer protocol.\n");

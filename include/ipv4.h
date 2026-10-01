@@ -1,5 +1,5 @@
-#ifndef IP_H
-#define IP_H
+#ifndef IPV4_H
+#define IPV4_H
 
 #include <pcap/pcap.h>
 
@@ -74,4 +74,4 @@ typedef struct __attribute__((packed)) {
  */
 void process_ipv4_packet(const u_char *packet);
 
-#endif /* IP_H */
+#endif /* IPV4_H */

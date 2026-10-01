@@ -31,12 +31,11 @@ void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char
     (void)args; /* Unused parameter */
     
     char timestamp[TIMESTAMP_STR_SZ] = {0};
-
     timestamp_to_str(header->ts, timestamp, sizeof(timestamp));
 
-    fprintf(stdout, "[%s] Packet received (length: %d).\n", timestamp, header->len);
+    fprintf(stdout, "[%s] Packet received (Wire: %u, Captured: %u).\n", timestamp, header->len, header->caplen);
 
-    process_ethernet_frame(packet);
+    process_ethernet_frame(packet, header->caplen);
 
     fprintf(stdout, "--------------------------------------------------\n");
 }

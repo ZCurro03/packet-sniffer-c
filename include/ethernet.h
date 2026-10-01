@@ -52,7 +52,8 @@ typedef struct __attribute__((__packed__)) {
 /**
  * Processes an Ethernet frame and prints relevant information.
  * @param packet Pointer to the raw Ethernet frame data.
+ * @param length The length of the Ethernet frame.
  */
-void process_ethernet_frame(const u_char *packet);
+void process_ethernet_frame(const u_char *packet, uint32_t length);
 
 #endif /* ETHERNET_H */
