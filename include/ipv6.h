@@ -10,6 +10,8 @@
 
 #define IPV6_HEADER_LEN 40  /* Fixed length of the IPv6 base header */
 
+#define IPV6_VERSION 6      /* IPv6 version number */
+
 #define IPV6_NEXT_HEADER_HOP_BY_HOP 0   /* Hop-by-Hop Options */
 #define IPV6_NEXT_HEADER_TCP        6   /* TCP Next Header value */
 #define IPV6_NEXT_HEADER_UDP        17  /* UDP Next Header value */

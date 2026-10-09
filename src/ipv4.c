@@ -55,23 +55,23 @@ void process_ipv4_packet(const u_char *packet, uint32_t length) {
     /* If the packet claims to be larger than what we actually captured, we limit ourselves strictly to what was captured */
     uint32_t safe_payload_len = expected_payload_len;
     if (expected_payload_len > captured_payload_len) {
-        fprintf(stdout, "  [!] Warning: IPv4 payload may have been truncated during capture (%u of %u bytes available)\n",
+        fprintf(stdout, "  [!] Warning: IPv4 payload may have been truncated during capture (%u of %u bytes available).\n",
                 captured_payload_len, expected_payload_len);
         safe_payload_len = captured_payload_len;
     }
 
     switch (protocol) {
         case PROTOCOL_ICMP:
-            process_icmp_message(packet + ipv4_header_len);
+            process_icmp_message(packet + ipv4_header_len, safe_payload_len);
             break;
         case PROTOCOL_IGMP:
             process_igmp_packet(packet + ipv4_header_len, safe_payload_len);
             break;
         case PROTOCOL_TCP:
-            process_tcp_segment(packet + ipv4_header_len);
+            process_tcp_segment(packet + ipv4_header_len, safe_payload_len);
             break;
         case PROTOCOL_UDP:
-            process_udp_datagram(packet + ipv4_header_len);
+            process_udp_datagram(packet + ipv4_header_len, safe_payload_len);
             break;
         default:
             fprintf(stdout, "Unsupported protocol value for further processing.\n");

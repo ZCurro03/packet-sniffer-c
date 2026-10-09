@@ -8,13 +8,26 @@
  * Public functions implementation *
  ***********************************/
 
-void process_tcp_segment(const u_char *segment) {
-    if (!segment) {
-        fprintf(stderr, "Error: invalid TCP segment.\n");
+void process_tcp_segment(const u_char *segment, uint32_t length) {
+    if (!segment || length < TCP_HEADER_MIN_LEN) {
+        fprintf(stderr, "Error: invalid or truncated TCP segment.\n");
         return;
     }
 
     const TcpHeader *tcp_header = (const TcpHeader *)segment;
+
+    uint8_t  data_offset    = (tcp_header->offset_res >> 4);
+    uint32_t tcp_header_len = data_offset * 4;
+
+    if (data_offset < TCP_MIN_DATA_OFFSET) {
+        fprintf(stderr, "Error: malformed TCP segment (data offset %u is too small).\n", data_offset);
+        return;
+    }
+
+    if (length < tcp_header_len) {
+        fprintf(stderr, "Error: truncated TCP segment (requires %u bytes, got %u).\n", tcp_header_len, length);
+        return;
+    }
 
     uint16_t src_port = ntohs(tcp_header->src_port);
     uint16_t dst_port = ntohs(tcp_header->dest_port);
@@ -26,7 +39,7 @@ void process_tcp_segment(const u_char *segment) {
     fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Destination Port:", dst_port);
     fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Sequence Number:", seq_num);
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Flags:");    
+    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Flags:");
     if (flags == 0) {
         fprintf(stdout, "None\n");
     } else {
@@ -36,7 +49,7 @@ void process_tcp_segment(const u_char *segment) {
         };
         size_t num_flags = sizeof(flag_map) / sizeof(flag_map[0]);
         bool has_printed = false;
-        
+
         for (size_t i = 0; i < num_flags; i++) {
             if (flags & flag_map[i].mask) {
                 fprintf(stdout, "%s%s", has_printed ? "-" : "", flag_map[i].name);
@@ -45,12 +58,16 @@ void process_tcp_segment(const u_char *segment) {
         }
         fprintf(stdout, "\n");
     }
-    
-    uint8_t  data_offset    = (tcp_header->offset_res >> 4);
-    uint32_t tcp_header_len = data_offset * 4;
+
+    /* Notify about the presence of TCP options */
+    if (data_offset > TCP_MIN_DATA_OFFSET) {
+        uint8_t options_len = tcp_header_len - TCP_HEADER_MIN_LEN;
+        fprintf(stdout, "  %-*s %u bytes present\n", FIELD_WIDTH, "TCP Options:", options_len);
+    }
+
     const u_char *app_payload = segment + tcp_header_len;
+    uint32_t payload_len      = length - tcp_header_len;
 
     (void)app_payload;  /* Suppress unused variable warning */
-
-    /* TODO: Process application layer payload if needed */
+    (void)payload_len;  /* Suppress unused variable warning */
 }

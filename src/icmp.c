@@ -8,9 +8,9 @@
  * Public functions implementation *
  ***********************************/
 
-void process_icmp_message(const u_char *message) {
-    if (!message) {
-        fprintf(stderr, "Error: invalid ICMP message.\n");
+void process_icmp_message(const u_char *message, uint32_t length) {
+    if (!message || length < ICMP_HEADER_LEN) {
+        fprintf(stderr, "Error: invalid or truncated ICMP message.\n");
         return;
     }
 
@@ -42,17 +42,23 @@ void process_icmp_message(const u_char *message) {
     fprintf(stdout, " (%u)\n", icmp->type);
 
     fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Code:", icmp->code);
-    
+
     /* Display additional information for Echo messages */
     if (icmp->type == ICMP_TYPE_ECHO_REQUEST || icmp->type == ICMP_TYPE_ECHO_REPLY) {
         uint16_t identifier = ntohs(icmp->identifier);
         uint16_t sequence   = ntohs(icmp->sequence);
-        
+
         fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Identifier:", identifier);
         fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Sequence Num:", sequence);
     }
 
     if (icmp->type == ICMP_TYPE_DEST_UNREACH || icmp->type == ICMP_TYPE_TIME_EXCEEDED) {
+        uint32_t required_len = sizeof(IcmpHeader) + sizeof(IPv4Header);
+        if (length < required_len) {
+            fprintf(stderr, "Error: truncated ICMP error message (missing inner IPv4 header).\n");
+            return;
+        }
+
         const IPv4Header *inner_ip = (const IPv4Header *)(message + sizeof(IcmpHeader));
 
         fprintf(stdout, "Original Failed IPv4 Packet:\n");

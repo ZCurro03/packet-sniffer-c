@@ -43,7 +43,7 @@ typedef struct __attribute__((packed)) {
  ********************************/
 
 /**
- * Process a UDP datagram.
+ * Processes a UDP datagram.
  * @param datagram The UDP datagram to process.
  * @param length The length of the UDP datagram.
  */

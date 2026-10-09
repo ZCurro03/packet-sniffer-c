@@ -131,10 +131,10 @@ typedef struct __attribute__((packed)) {
  ********************************/
 
 /**
- * Process an IGMP packet.
+ * Processes an IGMP packet.
  * @param packet The IGMP packet to process.
  * @param length The length of the IGMP packet.
  */
-void process_igmp_packet(const u_char *packet, uint16_t length);
+void process_igmp_packet(const u_char *packet, uint32_t length);
 
 #endif /* IGMP_H */

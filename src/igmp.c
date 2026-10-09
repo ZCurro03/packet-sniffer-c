@@ -13,30 +13,30 @@
  * @param packet Pointer to the IGMP v1/v2 packet.
  * @param length Length of the IGMP v1/v2 packet.
  */
-void process_igmp_v1v2_packet(const u_char *packet, uint16_t length);
+void process_igmp_v1v2_packet(const u_char *packet, uint32_t length);
 
 /**
  * Processes an IGMP v3 Report packet and prints relevant information.
  * @param packet Pointer to the IGMP v3 packet.
  * @param length Length of the IGMP v3 packet.
  */
-void process_igmp_v3_report(const u_char *packet, uint16_t length);
+void process_igmp_v3_report(const u_char *packet, uint32_t length);
 
 /**
  * Processes an IGMP v3 Query packet and prints relevant information.
  * @param packet Pointer to the IGMP v3 packet.
  * @param length Length of the IGMP v3 packet.
  */
-void process_igmp_v3_query(const u_char *packet, uint16_t length);
+void process_igmp_v3_query(const u_char *packet, uint32_t length);
 
 
 /***********************************
  * Public functions implementation *
  ***********************************/
 
-void process_igmp_packet(const u_char *packet, uint16_t length) {
+void process_igmp_packet(const u_char *packet, uint32_t length) {
     if (!packet || length < IGMP_V1V2_HEADER_LEN) {
-        fprintf(stderr, "Error: invalid IGMP packet.\n");
+        fprintf(stderr, "Error: invalid or truncated IGMP packet.\n");
         return;
     }
 
@@ -70,9 +70,9 @@ void process_igmp_packet(const u_char *packet, uint16_t length) {
  * Private functions implementation *
  ************************************/
 
-void process_igmp_v1v2_packet(const u_char *packet, uint16_t length) {
+void process_igmp_v1v2_packet(const u_char *packet, uint32_t length) {
     if (!packet || length < IGMP_V1V2_HEADER_LEN) {
-        fprintf(stderr, "Error: invalid IGMP v1/v2 packet.\n");
+        fprintf(stderr, "Error: invalid or truncated IGMP v1/v2 packet.\n");
         return;
     }
     
@@ -110,9 +110,9 @@ void process_igmp_v1v2_packet(const u_char *packet, uint16_t length) {
     fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Group Address:", inet_ntoa(group));
 }
 
-void process_igmp_v3_report(const u_char *packet, uint16_t length) {
+void process_igmp_v3_report(const u_char *packet, uint32_t length) {
     if (!packet || length < IGMP_V3_REPORT_HEADER_LEN) {
-        fprintf(stderr, "Error: invalid IGMP v3 Report packet.\n");
+        fprintf(stderr, "Error: invalid or truncated IGMP v3 Report packet.\n");
         return;
     }
 
@@ -127,7 +127,7 @@ void process_igmp_v3_report(const u_char *packet, uint16_t length) {
 
     for (uint16_t i = 0; i < num_records; i++) {
         if (ptr + sizeof(IgmpV3GroupRecord) > packet_end) {
-            fprintf(stderr, "  [!] Warning: Truncated IGMPv3 Group Record.\n");
+            fprintf(stderr, "  [!] Warning: truncated IGMPv3 Group Record.\n");
             break; 
         }
 
@@ -143,12 +143,12 @@ void process_igmp_v3_report(const u_char *packet, uint16_t length) {
         
         for (uint16_t j = 0; j < num_sources; j++) {
             if (src_ptr + sizeof(struct in_addr) > packet_end) {
-                fprintf(stderr, "  [!] Warning: Truncated IGMPv3 Source Address.\n");
+                fprintf(stderr, "  [!] Warning: truncated IGMPv3 Source Address.\n");
                 break;
             }
 
             struct in_addr src_ip;
-            memcpy(&src_ip, src_ptr + (j * sizeof(struct in_addr)), sizeof(struct in_addr));
+            memcpy(&src_ip, src_ptr, sizeof(struct in_addr));
 
             char src_label[32];
             snprintf(src_label, sizeof(src_label), "Source %u:", j + 1);
@@ -160,7 +160,7 @@ void process_igmp_v3_report(const u_char *packet, uint16_t length) {
         uint32_t record_total_size = sizeof(IgmpV3GroupRecord) + 
                                      (num_sources * sizeof(struct in_addr)) + 
                                      (record->aux_data_len * 4);
-        if (ptr + record_total_size > packet_end) {
+        if (record_total_size > (uint32_t)(packet_end - ptr)) {
             fprintf(stderr, "  [!] Warning: IGMPv3 Group Record data exceeds packet length. Stopping parse.\n");
             break;
         }
@@ -169,9 +169,9 @@ void process_igmp_v3_report(const u_char *packet, uint16_t length) {
     }
 }
 
-void process_igmp_v3_query(const u_char *packet, uint16_t length) {
+void process_igmp_v3_query(const u_char *packet, uint32_t length) {
     if (!packet || length < IGMP_V3_QUERY_HEADER_LEN) {
-        fprintf(stderr, "Error: invalid IGMP v3 Query packet.\n");
+        fprintf(stderr, "Error: invalid or truncated IGMP v3 Query packet.\n");
         return;
     }
 
@@ -200,7 +200,7 @@ void process_igmp_v3_query(const u_char *packet, uint16_t length) {
 
     for (uint16_t i = 0; i < num_sources; i++) {
         if (ptr + sizeof(struct in_addr) > packet_end) {
-            fprintf(stderr, "    [!] Warning: Truncated IGMPv3 Source Address. Stopping parse.\n");
+            fprintf(stderr, "    [!] Warning: truncated IGMPv3 Source Address. Stopping parse.\n");
             break;
         }
 

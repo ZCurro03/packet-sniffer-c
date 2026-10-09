@@ -8,6 +8,10 @@
  * Macros *
  **********/
 
+#define TCP_HEADER_MIN_LEN 20  /* Minimum length of the TCP header (without options) */
+
+#define TCP_MIN_DATA_OFFSET 5  /* Minimum Data Offset value (5 * 4 = 20 bytes) */
+
 #define TCP_FLAG_CWR  0x80  /* CWR flag mask */
 #define TCP_FLAG_ECE  0x40  /* ECE flag mask */
 #define TCP_FLAG_URG  0x20  /* URG flag mask */
@@ -61,9 +65,10 @@ typedef struct __attribute__((packed)) {
  ********************************/
 
 /**
- * Process a TCP segment.
+ * Processes a TCP segment.
  * @param segment The TCP segment to process.
+ * @param length The length of the TCP segment.
  */
-void process_tcp_segment(const u_char *segment);
+void process_tcp_segment(const u_char *segment, uint32_t length);
 
 #endif /* TCP_H */

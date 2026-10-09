@@ -8,6 +8,8 @@
  * Macros *
  **********/
 
+#define ICMP_HEADER_LEN 8           /* Length of an ICMP header in bytes */
+
 #define ICMP_TYPE_ECHO_REPLY    0   /* Echo Reply */
 #define ICMP_TYPE_DEST_UNREACH  3   /* Destination Unreachable */
 #define ICMP_TYPE_REDIRECT      5   /* Redirect */
@@ -50,9 +52,10 @@ typedef struct __attribute__((packed)) {
  ********************************/
 
 /**
- * Process an ICMP message.
+ * Processes an ICMP message.
  * @param message The raw ICMP message to process.
+ * @param length The length of the ICMP message.
  */
-void process_icmp_message(const u_char *message);
+void process_icmp_message(const u_char *message, uint32_t length);
 
 #endif /* ICMP_H */
