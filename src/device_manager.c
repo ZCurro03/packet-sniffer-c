@@ -31,8 +31,6 @@ DeviceManager* device_manager_init() {
     manager->dev_count = 0;
     manager->selected_dev_idx = 0;
 
-    fprintf(stdout, "Initializing DeviceManager and retrieving available devices...\n");
-
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
 	if (pcap_findalldevs(&manager->alldevs, errbuf) == PCAP_ERROR) {
         fprintf(stderr, "Couldn't find available devices: %s\n", errbuf);
@@ -45,8 +43,6 @@ DeviceManager* device_manager_init() {
         manager->dev_count++;
         dev = dev->next;
     }
-
-    fprintf(stdout, "DeviceManager initialized successfully. Available devices retrieved.\n");
 
     return manager;
 }

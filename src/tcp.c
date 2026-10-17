@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/tcp.h"
 
 
@@ -18,6 +19,7 @@ void process_tcp_segment(const u_char *segment, uint32_t length) {
 
     uint8_t  data_offset    = (tcp_header->offset_res >> 4);
     uint32_t tcp_header_len = data_offset * 4;
+    bool has_options = (data_offset > TCP_MIN_DATA_OFFSET);
 
     if (data_offset < TCP_MIN_DATA_OFFSET) {
         fprintf(stderr, "Error: malformed TCP segment (data offset %u is too small).\n", data_offset);
@@ -32,14 +34,14 @@ void process_tcp_segment(const u_char *segment, uint32_t length) {
     uint16_t src_port = ntohs(tcp_header->src_port);
     uint16_t dst_port = ntohs(tcp_header->dest_port);
     uint32_t seq_num  = ntohl(tcp_header->seq_num);
-    uint8_t flags     = tcp_header->flags;
+    uint8_t  flags    = tcp_header->flags;
 
-    fprintf(stdout, "TCP Segment:\n");
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Source Port:", src_port);
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Destination Port:", dst_port);
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Sequence Number:", seq_num);
+    fprintf(stdout, "%s TCP\n", TREE_PROT);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Source Port:", src_port);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Destination Port:", dst_port);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Sequence Number:", seq_num);
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Flags:");
+    fprintf(stdout, "%s %-*s ", has_options ? TREE_ITEM : TREE_LAST, FIELD_WIDTH, "Flags:");
     if (flags == 0) {
         fprintf(stdout, "None\n");
     } else {
@@ -60,9 +62,9 @@ void process_tcp_segment(const u_char *segment, uint32_t length) {
     }
 
     /* Notify about the presence of TCP options */
-    if (data_offset > TCP_MIN_DATA_OFFSET) {
+    if (has_options) {
         uint8_t options_len = tcp_header_len - TCP_HEADER_MIN_LEN;
-        fprintf(stdout, "  %-*s %u bytes present\n", FIELD_WIDTH, "TCP Options:", options_len);
+        fprintf(stdout, "%s %-*s %u bytes present\n", TREE_LAST, FIELD_WIDTH, "TCP Options:", options_len);
     }
 
     const u_char *app_payload = segment + tcp_header_len;

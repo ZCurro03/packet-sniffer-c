@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/ipv6.h"
 #include "../include/tcp.h"
 #include "../include/udp.h"
@@ -125,19 +126,16 @@ void process_ipv6_headers(const IPv6Header *ipv6_header, uint8_t depth) {
     inet_ntop(AF_INET6, &ipv6_header->dest_ip, dst_ip_str, INET6_ADDRSTRLEN);
 
     if (depth > 0) {
-        fprintf(stdout, "  Encapsulated IPv6 Header (Level %u):\n", depth);
+        fprintf(stdout, "%s IPv6 (Encapsulated Level %u)\n", TREE_PROT, depth);
     } else {
-        fprintf(stdout, "IPv6 Header:\n");
+        fprintf(stdout, "%s IPv6\n", TREE_PROT);
     }
 
-    int extra_indent = depth == 0 ? 0 : 2;
-    int adjusted_width = depth == 0 ? FIELD_WIDTH : FIELD_WIDTH - 2;
-
-    fprintf(stdout, "  %*s%-*s %u\n", extra_indent, "", adjusted_width, "Version:", version);
-    fprintf(stdout, "  %*s%-*s 0x%02X\n", extra_indent, "", adjusted_width, "Traffic Class:", traffic_class);
-    fprintf(stdout, "  %*s%-*s 0x%05X\n", extra_indent, "", adjusted_width, "Flow Label:", flow_label);
-    fprintf(stdout, "  %*s%-*s %u bytes\n", extra_indent, "", adjusted_width, "Payload Length:", payload_length);
-    fprintf(stdout, "  %*s%-*s %u\n", extra_indent, "", adjusted_width, "Hop Limit:", hop_limit);
-    fprintf(stdout, "  %*s%-*s %s\n", extra_indent, "", adjusted_width, "Source IP:", src_ip_str);
-    fprintf(stdout, "  %*s%-*s %s\n", extra_indent, "", adjusted_width, "Destination IP:", dst_ip_str);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Version:", version);
+    fprintf(stdout, "%s %-*s 0x%02X\n", TREE_ITEM, FIELD_WIDTH, "Traffic Class:", traffic_class);
+    fprintf(stdout, "%s %-*s 0x%05X\n", TREE_ITEM, FIELD_WIDTH, "Flow Label:", flow_label);
+    fprintf(stdout, "%s %-*s %u bytes\n", TREE_ITEM, FIELD_WIDTH, "Payload Length:", payload_length);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Hop Limit:", hop_limit);
+    fprintf(stdout, "%s %-*s %s\n", TREE_ITEM, FIELD_WIDTH, "Source IP:", src_ip_str);
+    fprintf(stdout, "%s %-*s %s\n", TREE_LAST, FIELD_WIDTH, "Destination IP:", dst_ip_str);
 }

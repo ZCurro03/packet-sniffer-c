@@ -44,8 +44,7 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    fprintf(stdout, "\n");
-
+    ui_print_header();
     ui_display_available_devices(device_manager_get_all_devices(manager));
 
     fprintf(stdout, "\n");
@@ -61,7 +60,6 @@ int main() {
     device_manager_set_selected_device_index(manager, selected_dev_idx - 1);
 
     pcap_if_t *dev = device_manager_get_selected_device(manager);
-    fprintf(stdout, "\nSniffing device: %s.\n", dev != NULL ? dev->name : "none");
 
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
     sniff_handle = pcap_open_live(dev->name, MAX_CAPLEN, PROMISC, 1000, errbuf);
@@ -71,7 +69,8 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    fprintf(stdout, "Sniffing session created successfully.\n");
+    fprintf(stdout, "\nSniffing on device '%s'.\n\n", dev->name);
+    ui_print_packet_separator();
 
     /* Use -1 to sniff until an error occurs */
     pcap_loop(sniff_handle, -1, process_packet, NULL);

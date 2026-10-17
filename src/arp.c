@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/arp.h"
 #include "../include/ethernet.h"
 #include "../include/ipv4.h"
@@ -63,11 +64,11 @@ void process_arp_packet(const u_char *packet, uint32_t length) {
         is_announcement = (sip.s_addr == tip.s_addr) && (sip.s_addr != 0);
     }
 
-    fprintf(stdout, "ARP packet:\n");
+    fprintf(stdout, "%s ARP\n", TREE_PROT);
 
     print_opcode(opcode, is_probe, is_announcement);
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Hardware Type:");
+    fprintf(stdout, "%s %-*s ", TREE_ITEM, FIELD_WIDTH, "Hardware Type:");
     switch (hw_type) {
         case ARP_HW_TYPE_ETHERNET:
             fprintf(stdout, "Ethernet");
@@ -78,7 +79,7 @@ void process_arp_packet(const u_char *packet, uint32_t length) {
     }
     fprintf(stdout, " (%u)\n", hw_type);
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Protocol Type:");
+    fprintf(stdout, "%s %-*s ", TREE_ITEM, FIELD_WIDTH, "Protocol Type:");
     switch (proto_type) {
         case ARP_PROTO_TYPE_IPV4:
             fprintf(stdout, "IPv4");
@@ -91,25 +92,25 @@ void process_arp_packet(const u_char *packet, uint32_t length) {
 
     /* Formatted display for Ethernet and IPv4 */
     if (is_eth) {
-        fprintf(stdout, "  %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
-                FIELD_WIDTH, "Sender MAC:",
+        fprintf(stdout, "%s %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
+                TREE_ITEM, FIELD_WIDTH, "Sender MAC:",
                 sender_hw[0], sender_hw[1], sender_hw[2],
                 sender_hw[3], sender_hw[4], sender_hw[5]);
 
-        fprintf(stdout, "  %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
-                FIELD_WIDTH, "Target MAC:",
+        fprintf(stdout, "%s %-*s %02X:%02X:%02X:%02X:%02X:%02X\n",
+                TREE_ITEM, FIELD_WIDTH, "Target MAC:",
                 target_hw[0], target_hw[1], target_hw[2],
                 target_hw[3], target_hw[4], target_hw[5]);
     } else {
-        fprintf(stdout, "Hardware addresses parsing unsupported (Type: %u, HLEN: %u).\n", hw_type, hlen);
+        fprintf(stdout, "%s Hardware addresses parsing unsupported (Type: %u, HLEN: %u).\n", TREE_ITEM, hw_type, hlen);
     }
 
     if (is_ipv4) {
-        fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Sender IP:", inet_ntoa(sip));
-        fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Target IP:", inet_ntoa(tip));
+        fprintf(stdout, "%s %-*s %s\n", TREE_ITEM, FIELD_WIDTH, "Sender IP:", inet_ntoa(sip));
+        fprintf(stdout, "%s %-*s %s\n", TREE_LAST, FIELD_WIDTH, "Target IP:", inet_ntoa(tip));
     } else {
-        fprintf(stdout, "Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n",
-                proto_type, plen);
+        fprintf(stdout, "%s Network protocol addresses parsing unsupported (Type: 0x%04X, PLEN: %u).\n",
+                TREE_LAST, proto_type, plen);
     }
 }
 
@@ -119,7 +120,7 @@ void process_arp_packet(const u_char *packet, uint32_t length) {
  ************************************/
 
 void print_opcode(uint16_t opcode, bool is_probe, bool is_announcement) {
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Operation:");
+    fprintf(stdout, "%s %-*s ", TREE_ITEM, FIELD_WIDTH, "Operation:");
     switch (opcode) {
         case ARP_OPCODE_REQUEST:
             fprintf(stdout, "Request");

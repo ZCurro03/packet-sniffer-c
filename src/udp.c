@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/udp.h"
 
 
@@ -25,10 +26,9 @@ void process_udp_datagram(const u_char *datagram, uint32_t length) {
         return;
     }
 
-    fprintf(stdout, "UDP datagram:\n");
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Source Port:", src_port);
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Destination Port:", dst_port);
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Total Length:", total_length);
+    fprintf(stdout, "%s UDP\n", TREE_PROT);
+    fprintf(stdout, "%s %-*s %u\n", TREE_ITEM, FIELD_WIDTH, "Source Port:", src_port);
+    fprintf(stdout, "%s %-*s %u\n", TREE_LAST, FIELD_WIDTH, "Destination Port:", dst_port);
 
     uint32_t expected_payload_len = total_length - UDP_HEADER_LEN;
     uint32_t captured_payload_len = length - UDP_HEADER_LEN;

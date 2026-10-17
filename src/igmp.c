@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/igmp.h"
 
 
@@ -42,7 +43,7 @@ void process_igmp_packet(const u_char *packet, uint32_t length) {
 
     uint8_t igmp_type = packet[0];
 
-    fprintf(stdout, "IGMP Message:\n");
+    fprintf(stdout, "%s IGMP\n", TREE_PROT);
     switch (igmp_type) {
         case IGMP_TYPE_MEMBERSHIP_QUERY:
             if (length >= IGMP_V3_QUERY_HEADER_LEN) {
@@ -60,7 +61,7 @@ void process_igmp_packet(const u_char *packet, uint32_t length) {
             process_igmp_v3_report(packet, length);
             break;
         default:
-            fprintf(stdout, "  %-*s Unknown (0x%02X)\n", FIELD_WIDTH, "Type:", igmp_type);
+            fprintf(stdout, "%s %-*s Unknown (0x%02X)\n", TREE_LAST, FIELD_WIDTH, "Type:", igmp_type);
             break;
     }
 }
@@ -82,7 +83,7 @@ void process_igmp_v1v2_packet(const u_char *packet, uint32_t length) {
     uint8_t max_resp_time = igmp_header->max_resp_time;
     struct in_addr group  = igmp_header->group;
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Type:");
+    fprintf(stdout, "%s %-*s ", TREE_ITEM, FIELD_WIDTH, "Type:");
     switch (type) {
         case IGMP_TYPE_MEMBERSHIP_QUERY:
             fprintf(stdout, "v%s Membership Query", max_resp_time == 0 ? "1" : "2");
@@ -104,10 +105,10 @@ void process_igmp_v1v2_packet(const u_char *packet, uint32_t length) {
 
     /* In IGMP v2, max_resp_time is expressed in tenths of a second. In v1 it's 0. */
     if (type == IGMP_TYPE_MEMBERSHIP_QUERY && max_resp_time > 0) {
-        fprintf(stdout, "  %-*s %u deciseconds\n", FIELD_WIDTH, "Max Response Time:", max_resp_time);
+        fprintf(stdout, "%s %-*s %u deciseconds\n", TREE_ITEM, FIELD_WIDTH, "Max Response Time:", max_resp_time);
     }
 
-    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Group Address:", inet_ntoa(group));
+    fprintf(stdout, "%s %-*s %s\n", TREE_LAST, FIELD_WIDTH, "Group Address:", inet_ntoa(group));
 }
 
 void process_igmp_v3_report(const u_char *packet, uint32_t length) {
@@ -119,8 +120,8 @@ void process_igmp_v3_report(const u_char *packet, uint32_t length) {
     const IgmpV3ReportHeader *report = (const IgmpV3ReportHeader *)packet;
     uint16_t num_records = ntohs(report->num_records);
 
-    fprintf(stdout, "  %-*s v3 Membership Report (0x22)\n", FIELD_WIDTH, "Type:");
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Group Records:", num_records);
+    fprintf(stdout, "%s %-*s v3 Membership Report (0x22)\n", TREE_ITEM, FIELD_WIDTH, "Type:");
+    fprintf(stdout, "%s %-*s %u\n", num_records > 0 ? TREE_ITEM : TREE_LAST, FIELD_WIDTH, "Group Records:", num_records);
 
     const u_char *packet_end = packet + length; /* Safety limit */
     const u_char *ptr = packet + sizeof(IgmpV3ReportHeader);
@@ -133,11 +134,13 @@ void process_igmp_v3_report(const u_char *packet, uint32_t length) {
 
         const IgmpV3GroupRecord *record = (const IgmpV3GroupRecord *)ptr;
         uint16_t num_sources = ntohs(record->num_sources);
+        bool is_last_record = (i == num_records - 1);
+        bool is_last_element = is_last_record && (num_sources == 0);
 
-        fprintf(stdout, "  Record %u:\n", i + 1);
-        fprintf(stdout, "    %-*s %u\n", FIELD_WIDTH - 2, "Record Type:", record->record_type);
-        fprintf(stdout, "    %-*s %s\n", FIELD_WIDTH - 2, "Multicast IP:", inet_ntoa(record->multicast_addr));
-        fprintf(stdout, "    %-*s %u\n", FIELD_WIDTH - 2, "Num Sources:", num_sources);
+        fprintf(stdout, "%s Record %u:\n", TREE_ITEM, i + 1);
+        fprintf(stdout, "%s   %-*s %u\n", TREE_ITEM, FIELD_WIDTH - 2, "Record Type:", record->record_type);
+        fprintf(stdout, "%s   %-*s %s\n", TREE_ITEM, FIELD_WIDTH - 2, "Multicast IP:", inet_ntoa(record->multicast_addr));
+        fprintf(stdout, "%s   %-*s %u\n", is_last_element ? TREE_LAST : TREE_ITEM, FIELD_WIDTH - 2, "Num Sources:", num_sources);
 
         const u_char *src_ptr = ptr + sizeof(IgmpV3GroupRecord);
         
@@ -150,9 +153,11 @@ void process_igmp_v3_report(const u_char *packet, uint32_t length) {
             struct in_addr src_ip;
             memcpy(&src_ip, src_ptr, sizeof(struct in_addr));
 
+            bool is_last_source = is_last_record && (j == num_sources - 1);
+
             char src_label[32];
             snprintf(src_label, sizeof(src_label), "Source %u:", j + 1);
-            fprintf(stdout, "      %-*s %s\n", FIELD_WIDTH - 4, src_label, inet_ntoa(src_ip));
+            fprintf(stdout, "%s     %-*s %s\n", is_last_source ? TREE_LAST : TREE_ITEM, FIELD_WIDTH - 4, src_label, inet_ntoa(src_ip));
 
             src_ptr += sizeof(struct in_addr);
         }
@@ -178,7 +183,7 @@ void process_igmp_v3_query(const u_char *packet, uint32_t length) {
     const IgmpV3QueryHeader *query = (const IgmpV3QueryHeader *)packet;
     uint16_t num_sources = ntohs(query->num_sources);
 
-    fprintf(stdout, "  %-*s v3 Membership Query (0x11)\n", FIELD_WIDTH, "Type:");
+    fprintf(stdout, "%s %-*s v3 Membership Query (0x11)\n", TREE_ITEM, FIELD_WIDTH, "Type:");
 
     /* Decoding of Max Response Code as per RFC 3376 */
     uint16_t max_time;
@@ -189,10 +194,10 @@ void process_igmp_v3_query(const u_char *packet, uint32_t length) {
         uint8_t exp  = (query->max_resp_code & 0x70) >> 4;
         max_time = (mant | 0x10) << (exp + 3);
     }
-    fprintf(stdout, "  %-*s %u deciseconds (Code: 0x%02X)\n", FIELD_WIDTH, "Max Resp Time:", max_time, query->max_resp_code);
+    fprintf(stdout, "%s %-*s %u deciseconds (Code: 0x%02X)\n", TREE_ITEM, FIELD_WIDTH, "Max Resp Time:", max_time, query->max_resp_code);
 
-    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Group Address:", inet_ntoa(query->group));
-    fprintf(stdout, "  %-*s %u\n", FIELD_WIDTH, "Total Sources:", num_sources);
+    fprintf(stdout, "%s %-*s %s\n", TREE_ITEM, FIELD_WIDTH, "Group Address:", inet_ntoa(query->group));
+    fprintf(stdout, "%s %-*s %u\n", num_sources > 0 ? TREE_ITEM : TREE_LAST, FIELD_WIDTH, "Total Sources:", num_sources);
 
     /* Safety limit */
     const u_char *packet_end = packet + length;
@@ -207,9 +212,11 @@ void process_igmp_v3_query(const u_char *packet, uint32_t length) {
         struct in_addr src_ip;
         memcpy(&src_ip, ptr, sizeof(struct in_addr));
 
+        bool is_last_source = (i == num_sources - 1);
+
         char src_label[32];
         snprintf(src_label, sizeof(src_label), "Source %u:", i + 1);
-        fprintf(stdout, "    %-*s %s\n", FIELD_WIDTH - 2, src_label, inet_ntoa(src_ip));
+        fprintf(stdout, "%s   %-*s %s\n", is_last_source ? TREE_LAST : TREE_ITEM, FIELD_WIDTH - 2, src_label, inet_ntoa(src_ip));
 
         ptr += sizeof(struct in_addr);
     }

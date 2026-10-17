@@ -41,11 +41,11 @@ setcap: $(EXE)
 
 run: $(EXE)
 	@echo "[MAKEFILE] Running packet sniffer..."
-	./$(EXE)
+	@./$(EXE)
 
 run_v: $(EXE)
 	@echo "[MAKEFILE] Running packet sniffer with Valgrind..."
-	$(VALGRIND) ./$(EXE)
+	@$(VALGRIND) ./$(EXE)
 
 full_clean:
 	@echo "[MAKEFILE] Cleaning all binary files and executables..."

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include "../include/packet_handler.h"
+#include "../include/ui.h"
 #include "../include/ethernet.h"
 
 
@@ -39,11 +40,15 @@ void process_packet(u_char *args, const struct pcap_pkthdr *header, const u_char
     char timestamp[TIMESTAMP_STR_SZ] = {0};
     timestamp_to_str(header->ts, timestamp, sizeof(timestamp));
 
-    fprintf(stdout, "[%s] Packet received (Wire: %u, Captured: %u).\n", timestamp, header->len, header->caplen);
+    fprintf(stdout, "[%s] Packet received (Size: %u bytes, Captured: %u bytes)", timestamp, header->len, header->caplen);
+    if (header->caplen < header->len) {
+        fprintf(stdout, " %s[TRUNCATED]%s", UI_COLOR_YELLOW, UI_COLOR_RESET);
+    }
+    fprintf(stdout, "\n");
 
     process_ethernet_frame(packet, header->caplen);
 
-    fprintf(stdout, "--------------------------------------------------\n");
+    ui_print_packet_separator();
 }
 
 

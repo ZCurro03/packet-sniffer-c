@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../include/utils.h"
+#include "../include/ui.h"
 #include "../include/ipv4.h"
 #include "../include/tcp.h"
 #include "../include/udp.h"
@@ -93,6 +94,7 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
     uint8_t version = ipv4_header->version_ihl >> 4;
     uint8_t ihl = ipv4_header->version_ihl & 0x0F;
     *header_len = ihl * 4;  /* Real header size in bytes */
+    bool has_options = (ihl > IPV4_MIN_IHL_VALUE);
 
     /* Validate data */
     if (version != IPV4_VERSION || ihl < IPV4_MIN_IHL_VALUE || ihl > IPV4_MAX_IHL_VALUE) {
@@ -100,11 +102,11 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
         return 0;
     }
 
-    fprintf(stdout, "IPv4 headers:\n");
-    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Source IP:", inet_ntoa(ipv4_header->src_ip));
-    fprintf(stdout, "  %-*s %s\n", FIELD_WIDTH, "Destination IP:", inet_ntoa(ipv4_header->dest_ip));
+    fprintf(stdout, "%s IPv4\n", TREE_PROT);
+    fprintf(stdout, "%s %-*s %s\n", TREE_ITEM, FIELD_WIDTH, "Source IP:", inet_ntoa(ipv4_header->src_ip));
+    fprintf(stdout, "%s %-*s %s\n", TREE_ITEM, FIELD_WIDTH, "Destination IP:", inet_ntoa(ipv4_header->dest_ip));
 
-    fprintf(stdout, "  %-*s ", FIELD_WIDTH, "Protocol:");
+    fprintf(stdout, "%s %-*s ", has_options ? TREE_ITEM : TREE_LAST, FIELD_WIDTH, "Protocol:");
     uint8_t protocol = ipv4_header->protocol;
     switch (protocol) {
         case PROTOCOL_ICMP:
@@ -126,9 +128,9 @@ uint8_t process_ipv4_headers(const IPv4Header *ipv4_header, uint8_t *header_len)
     fprintf(stdout, " (%u)\n", protocol);
 
     /* Notify about the presence of IPv4 options */
-    if (ihl > IPV4_MIN_IHL_VALUE) {
+    if (has_options) {
         uint8_t options_len = *header_len - IPV4_HEADER_MIN_LEN;
-        fprintf(stdout, "  %-*s %u bytes present\n", FIELD_WIDTH, "IPv4 Options:", options_len);
+        fprintf(stdout, "%s %-*s %u bytes present\n", TREE_LAST, FIELD_WIDTH, "IPv4 Options:", options_len);
     }
 
     return protocol;
