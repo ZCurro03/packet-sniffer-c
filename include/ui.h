@@ -9,7 +9,7 @@
  * Macros *
  **********/
 
-#define PACKET_SEPARATOR_LENGTH 72      /* Length of the packet separator line */
+#define PACKET_SEPARATOR_LENGTH 74      /* Length of the packet separator line */
 
 #define UI_COLOR_RED     "\033[31m"     /* Red color ANSI Escape Code */
 #define UI_COLOR_YELLOW  "\033[33m"     /* Yellow color ANSI Escape Code */
@@ -27,6 +27,16 @@
 /********************************
  * Public functions declaration *
  ********************************/
+
+/**
+ * Configures the terminal to hide ECHOCTL characters (like Ctrl+C).
+ */
+void ui_configure_terminal(void);
+
+/**
+ * Restores the terminal settings to their original state.
+ */
+void ui_restore_terminal(void);
 
 /**
  * Displays the title header of the application.

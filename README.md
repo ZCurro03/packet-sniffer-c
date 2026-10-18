@@ -16,29 +16,47 @@ To compile and run this project, you will need the following dependencies instal
 
 This project includes a `Makefile` to streamline the build process. Navigate to the root directory of the project and use the following commands:
 * `make compile`: Compiles the source code and generates the `sniffer` executable.
-* `make clean`: Removes the intermediate object files (`.o`) from the `obj/` directory.
+* `make clean`: Removes the intermediate object and dependency files (`.o` and `.d`) from the `obj/` directory.
 * `make full_clean`: Removes both the object files and the final `sniffer` executable.
 
 ## Usage
 
 Because packet sniffing requires putting the network interface into promiscuous mode and accessing raw sockets, the operating system restricts this action to privileged users. You have two options to run the program:
 
+### Permissions: Sudo vs. Capabilities
+
 **Option 1: Using sudo (Standard)**
 
 The simplest way to run the sniffer is with root privileges. You can use the Makefile wrapper or run the binary directly:
-* `sudo make run`
-* `sudo ./sniffer`
+* `sudo ./sniffer [options]`
+* `sudo make run` *(Runs the interactive live capture)*
 
 **Option 2: Using Linux Capabilities (Secure & No Sudo)**
 
 If you prefer not to run the program as root, you can grant the specific network capabilities to the compiled binary. This allows any standard user to execute it. We have included a convenient Make rule to automate this process:
-1. Compile the program and set the network capabilities in one go: 
-   `make compile setcap` 
-   *(Note: This will prompt for your sudo password once to apply the permissions).*
-2. Run the sniffer as a normal user: 
-   `./sniffer`
+1. Compile the program and set the network capabilities in one go: `make compile setcap` *(Note: This will prompt for your sudo password once to apply the permissions).*
+2. Run the sniffer as a normal user: `./sniffer [options]`
+
+### Execution Modes
+
+The sniffer supports both interactive and command-line execution modes.
+
+**1. Interactive Mode**
+
+Running the program without arguments will launch the interactive device selection menu: `./sniffer`
+
+**2. Command-Line Options**
+
+You can bypass the interactive menu by providing specific flags:
+* `-i <interface>`: Listen on the specified interface (Live Capture). Example: `./sniffer -i eth0`
+* `-r <pcap_file>`: Read packets from an offline `.pcap` file. Example: `./sniffer -r traffic.pcap`
+* `-h`: Show the help message and exit.
+
+*Note: The `-i` and `-r` options are mutually exclusive.*
 
 ## Debugging
 
-To run the sniffer through Valgrind to check for memory leaks (requires root privileges if capabilities are not set):
+To run the sniffer through Valgrind to check for memory leaks (requires root privileges):
 * `sudo make run_v`
+
+**Important Note on Valgrind and setcap:** Valgrind cannot profile executables that have Linux Capabilities (`setcap`) enabled due to kernel security restrictions (Secure-execution mode disables `LD_PRELOAD`). If you encounter a `Permission denied` error from Valgrind, strip the capabilities first by running `sudo setcap -r ./sniffer`, and then run `sudo make run_v`.

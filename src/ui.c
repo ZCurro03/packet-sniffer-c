@@ -1,12 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
+#include <unistd.h>
 #include "../include/ui.h"
+
+
+/********************
+ * Global Variables *
+ ********************/
+
+static struct termios original_termios;  /* Stores the original terminal settings */
 
 
 /***********************************
  * Public functions implementation *
  ***********************************/
+
+void ui_configure_terminal(void) {
+    tcgetattr(STDIN_FILENO, &original_termios);
+    struct termios modified_termios = original_termios;
+    modified_termios.c_lflag &= ~(ECHOCTL);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &modified_termios);
+} 
+
+void ui_restore_terminal(void) {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios);
+}
 
 void ui_print_header(void) {
     /* Title ASCII art */
@@ -93,7 +113,6 @@ size_t ui_prompt_for_device_selection(size_t dev_count) {
 }
 
 void ui_print_packet_separator(void) {
-    fprintf(stdout, " ");
     for (int i = 0; i < PACKET_SEPARATOR_LENGTH; i++) {
         fprintf(stdout, "%s", PACKET_SEPARATOR);
     }
