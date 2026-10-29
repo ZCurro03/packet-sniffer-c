@@ -12,3 +12,6 @@ sniffer
 # Documentación personal
 STYLE.md
 TODO.md
+
+# Ficheros .pcap para pruebas
+samples/

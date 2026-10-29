@@ -21,9 +21,29 @@ This project includes a `Makefile` to streamline the build process. Navigate to 
 
 ## Usage
 
-Because packet sniffing requires putting the network interface into promiscuous mode and accessing raw sockets, the operating system restricts this action to privileged users. You have two options to run the program:
+### Execution Modes
+
+The sniffer supports both interactive and command-line execution modes.
+
+**1. Interactive Mode**
+
+Running the program without arguments will launch the interactive device selection menu (requires live capture privileges): `./sniffer`
+
+**2. Command-Line Options**
+
+You can bypass the interactive menu by providing specific flags:
+* `-i <interface>`: Listen on the specified interface (Live Capture). Example: `./sniffer -i eth0`
+* `-r <pcap_file>`: Read packets from an offline `.pcap` file. Example: `./sniffer -r traffic.pcap`
+* `-n <count>`: Set the maximum number of packets to process. Example: `./sniffer -r traffic.pcap -n 100`
+* `-h`: Show the help message and exit.
+
+*Note: The `-i` and `-r` options are mutually exclusive.*
 
 ### Permissions: Sudo vs. Capabilities
+
+*Note: Reading offline `.pcap` files using the `-r` option does **not** require any special privileges. You can execute the program as a standard user without sudo or capabilities.*
+
+Because packet sniffing requires putting the network interface into promiscuous mode and accessing raw sockets, the operating system restricts this action to privileged users. You have two options to run the program for live capture:
 
 **Option 1: Using sudo (Standard)**
 
@@ -36,23 +56,6 @@ The simplest way to run the sniffer is with root privileges. You can use the Mak
 If you prefer not to run the program as root, you can grant the specific network capabilities to the compiled binary. This allows any standard user to execute it. We have included a convenient Make rule to automate this process:
 1. Compile the program and set the network capabilities in one go: `make compile setcap` *(Note: This will prompt for your sudo password once to apply the permissions).*
 2. Run the sniffer as a normal user: `./sniffer [options]`
-
-### Execution Modes
-
-The sniffer supports both interactive and command-line execution modes.
-
-**1. Interactive Mode**
-
-Running the program without arguments will launch the interactive device selection menu: `./sniffer`
-
-**2. Command-Line Options**
-
-You can bypass the interactive menu by providing specific flags:
-* `-i <interface>`: Listen on the specified interface (Live Capture). Example: `./sniffer -i eth0`
-* `-r <pcap_file>`: Read packets from an offline `.pcap` file. Example: `./sniffer -r traffic.pcap`
-* `-h`: Show the help message and exit.
-
-*Note: The `-i` and `-r` options are mutually exclusive.*
 
 ## Debugging
 
