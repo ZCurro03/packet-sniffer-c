@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include "../include/utils.h"
 #include "../include/ui.h"
 #include "../include/arp.h"
 #include "../include/ethernet.h"

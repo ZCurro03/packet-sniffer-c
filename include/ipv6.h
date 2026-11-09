@@ -17,6 +17,7 @@
 #define IPV6_NEXT_HEADER_UDP        17  /* UDP Next Header value */
 #define IPV6_NEXT_HEADER_IPV6       41  /* IPv6 Encapsulation */
 #define IPV6_NEXT_HEADER_ICMPV6     58  /* ICMPv6 Next Header value */
+#define IPV6_NEXT_HEADER_NO_NEXT    59  /* No Next Header value */
 
 #define MAX_IPV6_DEPTH 4    /* Maximum allowed nested IPv6 headers to prevent DoS */
 

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "../include/utils.h"
 #include "../include/ui.h"
 #include "../include/ipv4.h"
 #include "../include/icmp.h"

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "../include/utils.h"
 #include "../include/ui.h"
 #include "../include/ethernet.h"
 #include "../include/arp.h"

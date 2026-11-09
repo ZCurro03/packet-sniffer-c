@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "../include/utils.h"
 #include "../include/ui.h"
 #include "../include/ipv6.h"
+#include "../include/icmpv6.h"
 #include "../include/tcp.h"
 #include "../include/udp.h"
 
@@ -84,8 +84,6 @@ void process_ipv6_packet(const u_char *packet, uint32_t length) {
         safe_payload_len = captured_payload_len;
     }
 
-    (void)safe_payload_len;  /* Suppress unused variable warning */
-
     switch (next_header) {
         case IPV6_NEXT_HEADER_TCP:
             process_tcp_segment(current_ptr, safe_payload_len);
@@ -94,8 +92,10 @@ void process_ipv6_packet(const u_char *packet, uint32_t length) {
             process_udp_datagram(current_ptr, safe_payload_len);
             break;
         case IPV6_NEXT_HEADER_ICMPV6:
-            fprintf(stdout, "ICMPv6 protocol to be implemented.\n");
+            process_icmpv6_message(current_ptr, safe_payload_len);
             break;
+        case IPV6_NEXT_HEADER_NO_NEXT:
+            break;  /* No more headers, end of packet */
         default:
             fprintf(stdout, "Unknown or unsupported Next Header (0x%02X)\n", next_header);
             break;

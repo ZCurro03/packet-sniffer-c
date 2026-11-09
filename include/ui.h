@@ -18,6 +18,7 @@
 #define UI_COLOR_RESET   "\033[0m"      /* Reset color ANSI Escape Code */
 
 /* UI Tree View Elements (UTF-8 Hex) */
+#define FIELD_WIDTH 20                                          /* Width for displaying field names in the output */
 #define TREE_PROT " \xE2\x94\x9C\xE2\x94\x80"                   /* " ├─" */
 #define TREE_ITEM " \xE2\x94\x82   \xE2\x94\x9C\xE2\x94\x80"    /* " │   ├─" */
 #define TREE_LAST " \xE2\x94\x82   \xE2\x94\x94\xE2\x94\x80"    /* " │   └─" */
