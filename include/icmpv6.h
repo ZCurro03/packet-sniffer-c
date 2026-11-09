@@ -57,6 +57,96 @@ typedef struct __attribute__((packed)) {
     uint16_t checksum;    /* Checksum */
 } Icmpv6Header;
 
+/**
+ * ICMPv6 message content structures for specific message types.
+ * These structures are used to interpret the content of ICMPv6 messages based on their type and code.
+ * The fields are defined according to the ICMPv6 message content format.
+ * 
+ * - Destination Unreachable and Time Exceeded: 32 unused bits.
+ * - Packet Too Big: 32 bits for the MTU value.
+ * - Parameter Problem: 32 bits for the pointer to the error.
+ * - Echo Request and Echo Reply: 16 bits for the identifier and 16 bits for the sequence number.
+ * - Router Advertisement: 8 bits for the current hop limit, 8 bits for flags, 16 bits for the router lifetime, 32
+ *   bits for the reachable time, and 32 bits for the retransmission timer.
+ * - Neighbor Solicitation: 32 reserved bits and 128 bits for the target address.
+ * - Neighbor Advertisement: 32 bits for flags and 128 bits for the target address.
+ * - Redirect Message: 32 reserved bits, 128 bits for the target address, and 128 bits for the destination address.
+ */
+
+/**
+ * Structure for ICMPv6 messages that have 32 reserved or unused bits.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t reserved;
+} Icmpv6Reserved4;
+
+/**
+ * Structure for ICMPv6 Packet Too Big messages, which include a 32-bit MTU value.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t mtu;
+} Icmpv6ErrorMtu;
+
+/**
+ * Structure for ICMPv6 Parameter Problem messages, which include a 32-bit pointer to the error.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t pointer;
+} Icmpv6ErrorPointer;
+
+/**
+ * Structure for ICMPv6 Echo Request and Echo Reply messages, which include a 16-bit identifier and a 16-bit sequence number.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint16_t identifier;
+    uint16_t sequence;
+} Icmpv6EchoFields;
+
+/**
+ * Structure for ICMPv6 Router Advertisement messages, which include various fields related to the router's configuration.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint8_t  cur_hop_limit;
+    uint8_t  flags;
+    uint16_t router_lifetime;
+    uint32_t reachable_time;
+    uint32_t retrans_timer;
+} Icmpv6NdRouterAdv;
+
+/**
+ * Structure for ICMPv6 Neighbor Solicitation messages, which include a 32-bit reserved field and a 128-bit target address.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t reserved;
+    uint8_t  target_addr[16];
+} Icmpv6NdNeighborSol;
+
+/**
+ * Structure for ICMPv6 Neighbor Advertisement messages, which include a 32-bit flags field and a 128-bit target address.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t flags;
+    uint8_t  target_addr[16];
+} Icmpv6NdNeighborAdv;
+
+/**
+ * Structure for ICMPv6 Redirect messages, which include a 32-bit reserved field, a 128-bit target address, and a 128-bit
+ * destination address.
+ * The structure is packed to ensure that there is no padding between fields.
+ */
+typedef struct __attribute__((packed)) {
+    uint32_t reserved;
+    uint8_t  target_addr[16];
+    uint8_t  dest_addr[16];
+} Icmpv6NdRedirect;
+
 
 /********************************
  * Public functions declaration *
