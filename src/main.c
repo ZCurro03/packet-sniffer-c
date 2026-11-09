@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <signal.h>
 #include <limits.h>
@@ -23,16 +24,30 @@
 pcap_t *sniff_handle = NULL;    /* The pcap handle for the active capture session */
 
 
-/*******************
- * Data structures *
- *******************/
+/***************************
+ * Data structures & enums *
+ ***************************/
 
+ /**
+  * Structure to hold the parsed command-line arguments.
+  * It includes the path to the pcap file, the target device for live capture,
+  * the BPF filter expression, the number of packets to capture, and a validity flag.
+  */
 typedef struct {
     const char *pcap_file;  /* Path to the pcap file for offline analysis */
     const char *target_dev; /* Name of the network interface for live capture */
+    const char *filter_exp; /* BPF filter expression */
     int num_packets;        /* Number of packets to capture (-1 for unlimited) */
     bool is_valid;          /* Flag indicating if the arguments are valid */
 } CLIArgs;
+
+/**
+ * Enumeration to represent the capture mode of the program.
+ */
+typedef enum {
+    MODE_LIVE,      /* Live capture on a network interface */
+    MODE_OFFLINE    /* Offline analysis from a pcap file */
+} CaptureMode;
 
 
 /*********************************
@@ -46,7 +61,8 @@ typedef struct {
 void handle_sigint(int signum);
 
 /**
- * Parses command-line arguments to determine the target device, the pcap file and the number of packets to capture.
+ * Parses command-line arguments to determine the target device, the pcap file, the filter expression
+ * and the number of packets to capture.
  * @param argc Argument count.
  * @param argv Argument vector.
  * @return The parsed command-line arguments.
@@ -62,18 +78,36 @@ void print_usage(const char *prog_name);
 /**
  * Runs a live packet capture session, either on the specified device or in interactive mode.
  * @param target_dev The name of the device to capture on, or NULL for interactive mode.
+ * @param filter_exp The BPF filter expression to apply, or NULL for no filter.
  * @param num_packets The number of packets to capture, or -1 for unlimited.
  * @return true if the capture was successful, false otherwise.
  */
-bool run_live_capture(const char *target_dev, int num_packets);
+bool run_live_capture(const char *target_dev, const char *filter_exp, int num_packets);
 
 /**
  * Runs an offline packet capture session from the specified pcap file.
  * @param pcap_file The name of the pcap file to analyze.
+ * @param filter_exp The BPF filter expression to apply, or NULL for no filter.
  * @param num_packets The number of packets to capture, or -1 for unlimited.
  * @return true if the capture was successful, false otherwise.
  */
-bool run_offline_capture(const char *pcap_file, int num_packets);
+bool run_offline_capture(const char *pcap_file, const char *filter_exp, int num_packets);
+
+/**
+ * Opens a pcap session for either live capture or offline analysis and stores the handle in the
+ * global variable 'sniff_handle'.
+ * @param source The name of the device or the path to the pcap file.
+ * @param mode The capture mode (live or offline).
+ * @return true if the pcap session was opened successfully, false otherwise.
+ */
+bool open_pcap_session(const char *source, CaptureMode mode);
+
+/**
+ * Applies a BPF filter to the pcap session handled by the global variable 'sniff_handle'.
+ * @param filter_exp The BPF filter expression to apply.
+ * @return true if the filter was applied successfully, false otherwise.
+ */
+bool apply_bpf_filter(const char *filter_exp);
 
 
 /********
@@ -96,11 +130,11 @@ int main(int argc, char *argv[]) {
     ui_print_header();
 
     if (args.pcap_file) {
-        if (!run_offline_capture(args.pcap_file, args.num_packets)) {
+        if (!run_offline_capture(args.pcap_file, args.filter_exp, args.num_packets)) {
             exit(EXIT_FAILURE);
         }
     } else {
-        if (!run_live_capture(args.target_dev, args.num_packets)) {
+        if (!run_live_capture(args.target_dev, args.filter_exp, args.num_packets)) {
             exit(EXIT_FAILURE);
         }
     }
@@ -120,18 +154,21 @@ void handle_sigint(int signum) {
 }
 
 CLIArgs parse_arguments(int argc, char *argv[]) {
-    CLIArgs args = { .target_dev = NULL, .pcap_file = NULL, .num_packets = -1, .is_valid = true };
+    CLIArgs args = { .target_dev = NULL, .pcap_file = NULL, .filter_exp = NULL, .num_packets = -1, .is_valid = true };
 
     opterr = 0;  /* Disable default error messages */
 
     int opt;
-    while (args.is_valid && (opt = getopt(argc, argv, ":i:r:n:h")) != -1) {
+    while (args.is_valid && (opt = getopt(argc, argv, ":i:r:f:n:h")) != -1) {
         switch (opt) {
             case 'i':
                 args.target_dev = optarg;
                 break;
             case 'r':
                 args.pcap_file = optarg;
+                break;
+            case 'f':
+                args.filter_exp = optarg;
                 break;
             case 'n':
                 char *endptr;
@@ -162,7 +199,7 @@ CLIArgs parse_arguments(int argc, char *argv[]) {
             case 'h':
             default:
                 args.is_valid = false;
-                return args;
+                break;
         }
     }
 
@@ -184,14 +221,15 @@ CLIArgs parse_arguments(int argc, char *argv[]) {
 }
 
 void print_usage(const char *prog_name) {
-    fprintf(stderr, "Usage: %s [-i interface] [-r pcap_file] [-n num_packets]\n", prog_name);
+    fprintf(stderr, "Usage: %s [-i interface] [-r pcap_file] [-f filter_exp] [-n num_packets]\n", prog_name);
     fprintf(stderr, "  -i <interface>   Listen on the specified interface\n");
     fprintf(stderr, "  -r <pcap_file>   Read packets from a pcap file\n");
+    fprintf(stderr, "  -f <filter_exp>  Apply a BPF filter expression (e.g., 'tcp port 80')\n");
     fprintf(stderr, "  -n <num_packets> The number of packets to capture (default: unlimited)\n");
     fprintf(stderr, "  -h               Show this help message\n");
 }
 
-bool run_live_capture(const char *target_dev, int num_packets) {
+bool run_live_capture(const char *target_dev, const char *filter_exp, int num_packets) {
     const char *device_name = NULL;
     DeviceManager *manager = NULL;
 
@@ -220,22 +258,14 @@ bool run_live_capture(const char *target_dev, int num_packets) {
         device_name = dev->name;
     }
 
-    char errbuf[PCAP_ERRBUF_SIZE] = {0};
-    sniff_handle = pcap_open_live(device_name, MAX_CAPLEN, PROMISC, 1000, errbuf);
-    if (sniff_handle == NULL) {
-        /* Clean error message */
-        char *clean_err = errbuf;
-        size_t dev_len = strlen(device_name);
+    if (!open_pcap_session(device_name, MODE_LIVE)) {
+        device_manager_free(manager);  /* Won't throw an error if manager is NULL */
+        return false;
+    }
 
-        if (strncmp(clean_err, device_name, dev_len) == 0 && clean_err[dev_len] == ':') {
-            clean_err += dev_len + 1;
-            if (*clean_err == ' ') {
-                clean_err++;  /* Skip the space after the colon */
-            }
-        }
-
-        fprintf(stderr, "Error: Couldn't open device '%s' - %s\n", device_name, clean_err);
-
+    if (filter_exp && !apply_bpf_filter(filter_exp)) {
+        pcap_close(sniff_handle);
+        sniff_handle = NULL;
         device_manager_free(manager);  /* Won't throw an error if manager is NULL */
         return false;
     }
@@ -255,32 +285,23 @@ bool run_live_capture(const char *target_dev, int num_packets) {
     return true;
 }
 
-bool run_offline_capture(const char *pcap_file, int num_packets) {
+bool run_offline_capture(const char *pcap_file, const char *filter_exp, int num_packets) {
     if (!pcap_file) {
         fprintf(stderr, "Error: No pcap file specified for offline capture.\n");
         return false;
     }
 
-    fprintf(stdout, "Mode: Offline analysis from file '%s'.\n\n", pcap_file);
-
-    char errbuf[PCAP_ERRBUF_SIZE] = {0};
-    sniff_handle = pcap_open_offline(pcap_file, errbuf);
-    if (sniff_handle == NULL) {
-        /* Clean error message */
-        char *clean_err = errbuf;
-        size_t filename_len = strlen(pcap_file);
-
-        if (strncmp(clean_err, pcap_file, filename_len) == 0 && clean_err[filename_len] == ':') {
-            clean_err += filename_len + 1;
-            if (*clean_err == ' ') {
-                clean_err++;  /* Skip the space after the colon */
-            }
-        }
-
-        fprintf(stderr, "Error: Couldn't open pcap file '%s' - %s\n", pcap_file, clean_err);
+    if (!open_pcap_session(pcap_file, MODE_OFFLINE)) {
         return false;
     }
 
+    if (filter_exp && !apply_bpf_filter(filter_exp)) {
+        pcap_close(sniff_handle);
+        sniff_handle = NULL;
+        return false;
+    }
+
+    fprintf(stdout, "\nMode: Offline analysis from file '%s'.\n\n", pcap_file);
     ui_print_packet_separator();
 
     /* Use num_packets = -1 to sniff until EOF is reached or an error occurs */
@@ -295,5 +316,83 @@ bool run_offline_capture(const char *pcap_file, int num_packets) {
     pcap_close(sniff_handle);
     sniff_handle = NULL;
 
+    return true;
+}
+
+bool open_pcap_session(const char *source, CaptureMode mode) {
+    if (!source) {
+        fprintf(stderr, "Error: No source specified for pcap session.\n");
+        return false;
+    }
+
+    char errbuf[PCAP_ERRBUF_SIZE] = {0};
+
+    switch (mode) {
+        case MODE_LIVE:
+            sniff_handle = pcap_open_live(source, MAX_CAPLEN, PROMISC, 1000, errbuf);
+            break;
+        case MODE_OFFLINE:
+            sniff_handle = pcap_open_offline(source, errbuf);
+            break;
+        default:
+            fprintf(stderr, "Error: Invalid capture mode specified.\n");
+            return false;
+    }
+
+    if (sniff_handle == NULL) {
+        /* Clean error message */
+        char *clean_err = errbuf;
+        size_t filename_len = strlen(source);
+
+        if (strncmp(clean_err, source, filename_len) == 0 && clean_err[filename_len] == ':') {
+            clean_err += filename_len + 1;
+            if (*clean_err == ' ') {
+                clean_err++;  /* Skip the space after the colon */
+            }
+        }
+
+        fprintf(stderr, "Error: Couldn't open %s '%s' - %s\n", (mode == MODE_LIVE) ? "device" : "file", source, clean_err);
+        return false;
+    }
+
+    return true;
+}
+
+bool apply_bpf_filter(const char *filter_exp) {
+    if (!filter_exp || strlen(filter_exp) == 0) {
+        return true;  /* No filter to apply */
+    }
+
+    struct bpf_program fp;
+
+    if (pcap_compile(sniff_handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN) == -1) {
+        /* Clean error message */
+        const char *err_msg = pcap_geterr(sniff_handle);
+        const char *colon_pos = strchr(err_msg, ':');
+
+        if (colon_pos != NULL) {
+            err_msg = colon_pos + 1;
+            if (*err_msg == ' ') {
+                err_msg++;
+            }
+        }
+
+        if (*err_msg != '\0') {
+            fprintf(stderr, "Error: Couldn't parse filter '%s' - %c%s\n", filter_exp,
+                toupper((unsigned char) err_msg[0]), err_msg + 1);
+        } else {
+            fprintf(stderr, "Error: Couldn't parse filter '%s'\n", filter_exp);
+        }
+
+        return false;
+    }
+
+    if (pcap_setfilter(sniff_handle, &fp) == -1) {
+        fprintf(stderr, "Error: Couldn't install filter '%s' - %s\n", filter_exp, pcap_geterr(sniff_handle));
+        pcap_freecode(&fp);
+        return false;
+    }
+
+    pcap_freecode(&fp);
     return true;
 }

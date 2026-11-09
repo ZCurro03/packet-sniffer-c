@@ -34,6 +34,7 @@ Running the program without arguments will launch the interactive device selecti
 You can bypass the interactive menu by providing specific flags:
 * `-i <interface>`: Listen on the specified interface (Live Capture). Example: `./sniffer -i eth0`
 * `-r <pcap_file>`: Read packets from an offline `.pcap` file. Example: `./sniffer -r traffic.pcap`
+* `-f <filter_exp>`: Apply a BPF filter expression to capture specific traffic. Example: `./sniffer -i eth0 -f "tcp port 80"`
 * `-n <count>`: Set the maximum number of packets to process. Example: `./sniffer -r traffic.pcap -n 100`
 * `-h`: Show the help message and exit.
 
